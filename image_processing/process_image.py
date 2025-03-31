@@ -1,6 +1,27 @@
 import cv2
 import pytesseract
 import numpy as np
+import argparse
+import json
+
+# Function to load configuration from a file
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        return json.load(file)
+
+# Function to parse command-line arguments
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Process chart images with customizable settings.')
+    parser.add_argument('--config', type=str, help='Path to configuration file')
+    parser.add_argument('--green-lower', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Lower HSV threshold for green color')
+    parser.add_argument('--green-upper', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Upper HSV threshold for green color')
+    parser.add_argument('--red-lower1', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Lower HSV threshold for red color (range 1)')
+    parser.add_argument('--red-upper1', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Upper HSV threshold for red color (range 1)')
+    parser.add_argument('--red-lower2', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Lower HSV threshold for red color (range 2)')
+    parser.add_argument('--red-upper2', type=int, nargs=3, metavar=('H', 'S', 'V'), help='Upper HSV threshold for red color (range 2)')
+    return parser.parse_args()
+
+
 
 
 # Function to process an image and extract text
@@ -44,7 +65,7 @@ def process_image(image_path):
     # Initialize a list to store detected horizontal red lines
     horizontal_red_lines = []
 
-    # Draw lines on the original image
+        # Draw lines on the original image
     if lines is not None:
         for rho, theta in lines[:, 0]:
             # Check if the line is horizontal (theta close to 0 or pi)
