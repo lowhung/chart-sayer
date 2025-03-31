@@ -41,18 +41,32 @@ def process_image(image_path):
     # Detect lines using Hough Line Transform
     lines = cv2.HoughLines(edges, 1, np.pi/180, 200)
 
+    # Initialize a list to store detected horizontal red lines
+    horizontal_red_lines = []
+
     # Draw lines on the original image
     if lines is not None:
         for rho, theta in lines[:, 0]:
-            a = np.cos(theta)
-            b = np.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            x1 = int(x0 + 1000 * (-b))
-            y1 = int(y0 + 1000 * (a))
-            x2 = int(x0 - 1000 * (-b))
-            y2 = int(y0 - 1000 * (a))
-            cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
+            # Check if the line is horizontal (theta close to 0 or pi)
+            if abs(theta) < np.pi/36 or abs(theta - np.pi) < np.pi/36:
+                a = np.cos(theta)
+                b = np.sin(theta)
+                x0 = a * rho
+                y0 = b * rho
+                x1 = int(x0 + 1000 * (-b))
+                y1 = int(y0 + 1000 * (a))
+                x2 = int(x0 - 1000 * (-b))
+                y2 = int(y0 - 1000 * (a))
+                # Clamp line endpoints to image boundaries
+                x1 = max(0, min(x1, image.shape[1] - 1))
+                y1 = max(0, min(y1, image.shape[0] - 1))
+                x2 = max(0, min(x2, image.shape[1] - 1))
+                y2 = max(0, min(y2, image.shape[0] - 1))
+
+                # Check if the line is red using the red mask
+                if red_mask[y1, x1] > 0 and red_mask[y2, x2] > 0:
+                    cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
+                    horizontal_red_lines.append(((x1, y1), (x2, y2)))
 
     # Use Tesseract to extract text
     text = pytesseract.image_to_string(gray_image)
@@ -64,7 +78,12 @@ def process_image(image_path):
     cv2.imwrite(output_filename, image)
     print(f"Processed image saved as: {output_filename}")
 
-    return text
+    # Return structured output
+    return {
+        "extracted_text": text,
+        "horizontal_red_lines": horizontal_red_lines,
+        "output_filename": output_filename
+    }
 
 # Example usage
 if __name__ == "__main__":
