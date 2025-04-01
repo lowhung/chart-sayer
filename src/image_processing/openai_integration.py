@@ -71,8 +71,8 @@ def process_chart_with_gpt4o(img_path, cfg_path):
 
 
 if __name__ == "__main__":
-    test_image_path = "/workspace/chart-sayer/test_chart_image.png"
-    test_config_path = "/workspace/chart-sayer/config/chart_config.json"
+    test_image_path = "/workspace/chart-sayer/src/test_images/test_chart_image.png"
+    test_config_path = "/workspace/chart-sayer/src/config/chart_config.json"
     try:
         result = process_chart_with_gpt4o(test_image_path, test_config_path)
         print("Analysis Result:", result)
