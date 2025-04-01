@@ -61,14 +61,19 @@ Alternatively, you can use a configuration file to define your settings. A sampl
     "green_upper": [85, 255, 255],
     "red_lower1": [0, 100, 100],
 ### Configuration Options
-The `config.json` file allows you to customize the color detection thresholds. Here are the options you can set:
+The `config.json` file allows you to customize various aspects of the bot's behavior and image processing. Here are the options you can set:
 
-- `green_lower`: The lower HSV threshold for detecting green colors.
-- `green_upper`: The upper HSV threshold for detecting green colors.
-- `red_lower1` and `red_upper1`: The HSV thresholds for detecting red colors in one range.
-- `red_lower2` and `red_upper2`: The HSV thresholds for detecting red colors in another range.
+- `clients`: List of clients to integrate with, such as `discord` and `telegram`.
+- `entry_color`: The color used to identify entry points on the chart.
+- `stop_loss_color`: The color used to identify stop loss points.
+- `take_profit_color`: The color used to identify take profit points.
+- `output_format`: The format string for the output message, using placeholders like `{entry}`, `{stop_loss}`, and `{take_profit}`.
+- `indicators`: List of indicators to use, such as `moving_average` and `parabolic_sar`.
+- `telegram`: Configuration specific to the Telegram bot, including `webhook_mode` and `webhook_url`.
+- `discord`: Configuration specific to the Discord bot, including `gateway_mode` and `webhook_mode`.
+- `image_processing`: Settings for image processing, including the `model` and `max_tokens`.
 
-You can modify these values to suit your specific chart analysis needs.
+These options allow you to tailor the bot's functionality to your specific needs.
     "red_upper1": [10, 255, 255],
     "red_lower2": [160, 100, 100],
     "red_upper2": [180, 255, 255]
