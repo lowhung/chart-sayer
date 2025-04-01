@@ -19,7 +19,15 @@ Chart Sayer is a lightweight service designed to analyze chart images and extrac
    ```
 
 ## Usage
-To process a chart image, run the following command:
+### Running the FastAPI Server
+To run the FastAPI server, ensure you have set up your environment variables in a `.env` file based on the `.env.example`. Then, execute the following command:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+```
+This will start the server, allowing you to interact with the API endpoints for Telegram and Discord bot integration.
+
+### Processing a Chart Image
+To process a chart image directly, run the following command:
 ```bash
 python3 image_processing/process_image.py
 ```
