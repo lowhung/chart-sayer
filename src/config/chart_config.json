@@ -1,6 +1,7 @@
 {
   "clients": [
-    "discord"
+    "discord",
+    "telegram"
   ],
   "entry_color": "green",
   "stop_loss_color": "red",
@@ -9,5 +10,17 @@
   "indicators": [
     "moving_average",
     "parabolic_sar"
-  ]
+  ],
+  "telegram": {
+    "webhook_mode": false,
+    "webhook_url": "https://your-domain.com"
+  },
+  "discord": {
+    "gateway_mode": true,
+    "webhook_mode": false
+  },
+  "image_processing": {
+    "model": "gpt-4o",
+    "max_tokens": 500
+  }
 }

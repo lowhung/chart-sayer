@@ -8,83 +8,83 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from src.bot_integration.discord_bot import setup_bot, shutdown_bot, start_bot
+from src.bot_integration.discord_bot import setup_bot as setup_discord_bot
+from src.bot_integration.discord_bot import shutdown_bot as shutdown_discord_bot
+from src.bot_integration.discord_bot import start_bot as start_discord_bot
+from src.bot_integration.telegram_bot import bot_manager, telegram_token
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Load environment variables from .env file
 load_dotenv()
 
-app = FastAPI()
-
-# Load chart configuration
 config_path = "src/config/chart_config.json"
 with open(config_path, 'r') as file:
     config = json.load(file)
 
-# Import Telegram and Discord routes conditionally
-if "telegram" in config["clients"]:
-    from src.bot_integration.telegram_routes import router as telegram_router
-
-    app.include_router(telegram_router)
-
-logger.info('Starting Discord bot')
-
-# Create a shutdown event
 shutdown_event = asyncio.Event()
 
 
-# Signal handler
-def signal_handler():
-    logging.info("Shutdown signal received!")
-    shutdown_event.set()
-
-
-# Signal handler that works with asyncio
 def handle_shutdown_signal():
     logger.info("Shutdown signal received!")
-    # Set the shutdown event and schedule the shutdown
     shutdown_event.set()
 
-    # Give the app a chance to shut down gracefully, then force exit if needed
     def force_exit():
         logger.warning("Forcing exit after 10 seconds")
         sys.exit(1)
 
-    # Schedule a forced exit in 10 seconds
     asyncio.get_event_loop().call_later(10, force_exit)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Set up signal handlers
     loop = asyncio.get_running_loop()
     for sig in (signal.SIGINT, signal.SIGTERM):
         loop.add_signal_handler(sig, handle_shutdown_signal)
 
-    if "discord" in config["clients"]:
-        # Set up the bot cogs
-        await setup_bot()
-
-        # Start the bot and command sync in tracked tasks
-        logger.info("Starting Discord bot...")
-        bot_task, sync_task = await start_bot()
+    discord_tasks = []
 
     try:
+
+        if "discord" in config["clients"]:
+            logger.info("Setting up Discord bot...")
+            await setup_discord_bot()
+            discord_tasks = await start_discord_bot()
+            logger.info("Discord bot started")
+
+        if "telegram" in config["clients"]:
+            telegram_config = config.get("telegram", {})
+
+            if telegram_config.get("webhook_mode", False):
+                webhook_url = telegram_config.get("webhook_url")
+                await bot_manager.start_bot(telegram_token, polling=False, webhook_url=webhook_url)
+            else:
+                await bot_manager.start_bot(telegram_token, polling=True)
+
         yield
     finally:
         logger.info("Application shutdown initiated...")
 
+        shutdown_tasks = []
+
         if "discord" in config["clients"]:
-            # Properly shut down the Discord bot
-            await shutdown_bot()
+            shutdown_tasks.append(shutdown_discord_bot())
+
+        if "telegram" in config["clients"]:
+            await bot_manager.shutdown()
+
+        if shutdown_tasks:
+            await asyncio.gather(*shutdown_tasks, return_exceptions=True)
 
         logger.info("Application shutdown complete")
 
 
 app = FastAPI(lifespan=lifespan)
+
+if "telegram" in config["clients"] and config.get("telegram", {}).get("webhook_mode", False):
+    from src.bot_integration.telegram_routes import router as telegram_router
+
+    app.include_router(telegram_router)
 
 
 @app.get("/")
@@ -92,7 +92,6 @@ async def read_root():
     return {"message": "Welcome to Chart Sayer API!"}
 
 
-# In-memory storage for positions
 positions = {}
 
 
@@ -104,13 +103,11 @@ async def get_positions(user_id: str):
 
 @app.post("/close_position/{position_id}")
 async def close_position(position_id: str):
-    # Logic to close the position and notify users
     return {"status": "Position closed", "position_id": position_id}
 
 
 @app.post("/update_position/{position_id}")
 async def update_position(position_id: str):
-    # Logic to update the position and notify users
     return {"status": "Position updated", "position_id": position_id}
 
 
