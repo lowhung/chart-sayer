@@ -17,6 +17,7 @@ dependencies = [
 
 [build-system]
 packages = [{ include = "src" }]
+package-dir = {"": "src"}
 
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
