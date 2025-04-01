@@ -1,8 +1,13 @@
 {
-    "clients": ["discord"],
-    "entry_color": "green",
-    "stop_loss_color": "red",
-    "take_profit_color": "blue",
-    "output_format": "Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}",
-    "indicators": ["moving_average", "parabolic_sar"]
+  "clients": [
+    "discord"
+  ],
+  "entry_color": "green",
+  "stop_loss_color": "red",
+  "take_profit_color": "blue",
+  "output_format": "Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}",
+  "indicators": [
+    "moving_average",
+    "parabolic_sar"
+  ]
 }
