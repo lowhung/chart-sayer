@@ -1,8 +1,9 @@
-import unittest
-from image_processing.process_image import parse_arguments, load_config
-from unittest.mock import patch
-import builtins
 import json
+import unittest
+from unittest.mock import patch
+
+from src.image_processing.process_image import parse_arguments, load_config
+
 
 class TestConfig(unittest.TestCase):
     def setUp(self):
@@ -33,6 +34,7 @@ class TestConfig(unittest.TestCase):
             args = parse_arguments()
             self.assertEqual(args.green_lower, [30, 90, 90])
             self.assertEqual(args.green_upper, [80, 250, 250])
+
 
 if __name__ == "__main__":
     unittest.main()
