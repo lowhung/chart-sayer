@@ -1,34 +1,43 @@
-import os
+import json
+import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request, Response, HTTPException, status
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
-router = APIRouter()
+from src.bot_integration.telegram_bot import bot, telegram_app
 
-# Initialize Telegram bot
-telegram_token = os.getenv('TELEGRAM_TOKEN')
-telegram_app = ApplicationBuilder().token(telegram_token).build()
+logger = logging.getLogger(__name__)
 
-
-async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Hello! I am your Chart Sayer bot.')
+router = APIRouter(prefix="/telegram", tags=["telegram"])
 
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Send me a chart image to analyze.')
+@router.post("/webhook")
+async def telegram_webhook(request: Request):
+    """Handle incoming webhook updates from Telegram."""
+    try:
 
+        data = await request.body()
 
-async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await update.message.reply_text('Processing your request...')
+        if data:
+            update_data = json.loads(data)
 
+            logger.debug(f"Received Telegram update: {update_data}")
 
-telegram_app.add_handler(CommandHandler('start', start))
-telegram_app.add_handler(CommandHandler('help', help_command))
-telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
+            update = Update.de_json(data=update_data, bot=bot)
 
+            if telegram_app:
+                await telegram_app.process_update(update)
+                return {"status": "success"}
+            else:
+                logger.error("Telegram application not initialized")
+                return Response(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            logger.warning("Received empty webhook request")
+            return {"status": "empty request"}
 
-@router.post("/telegram")
-async def telegram_webhook(update: Update):
-    await telegram_app.update_queue.put(update)
-    return {"status": "Telegram webhook received"}
+    except json.JSONDecodeError:
+        logger.error("Invalid JSON in webhook request")
+        raise HTTPException(status_code=400, detail="Invalid JSON")
+    except Exception as e:
+        logger.error(f"Error processing webhook: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
