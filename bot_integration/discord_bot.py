@@ -52,7 +52,6 @@ logger.info('Adding ChartSayerCog to the bot')
 
 
 # Add the cog to the bot
-async def if __name__ == "__main__":
+if __name__ == "__main__":
     import asyncio
-    asyncio.run(setup_bot()):
-    await bot.add_cog(ChartSayerCog(bot))
+    asyncio.run(setup_bot())
