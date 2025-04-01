@@ -3,7 +3,8 @@ name = "chart-sayer"
 version = "0.1.0"
 description = ""
 authors = [
-    {name = "openhands",email = "openhands@all-hands.dev"}
+    {name = "openhands",email = "openhands@all-hands.dev"},
+    {name = "lowhung", email = "hounslow@algalonlabs.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.12"
