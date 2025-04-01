@@ -43,6 +43,15 @@ python3 image_processing/process_image.py
 ```
 This will analyze the image and output the extracted information.
 
+### Command-Line Interface
+You can also process a chart image using the command-line interface. Run the following command:
+```bash
+python3 src/cli.py <image_path> <config_path>
+```
+Replace `<image_path>` with the path to your chart image file and `<config_path>` with the path to your configuration JSON file.
+
+This will analyze the image and output the extracted information based on the provided configuration.
+
 ## Customization
 Chart Sayer allows users to customize the analysis rules and output format through command-line arguments and configuration files.
 
