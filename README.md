@@ -15,12 +15,22 @@ Chart Sayer is a lightweight service designed to analyze chart images and extrac
    ```
 2. Install the required dependencies:
    ```bash
-   pip install -r requirements.txt
+   poetry install
    ```
+
+## Environment Variables
+Ensure you have the following environment variables set in your `.env` file:
+
+- `TELEGRAM_TOKEN`: Your Telegram bot token.
+- `DISCORD_TOKEN`: Your Discord bot token.
+- `DISCORD_CLIENT_ID`: Your Discord client ID.
+- `DISCORD_CLIENT_SECRET`: Your Discord client secret.
+- `DISCORD_PUBLIC_KEY`: Your Discord public key.
+- `OPENAI_API_KEY`: Your OpenAI API key.
 
 ## Usage
 ### Running the FastAPI Server
-To run the FastAPI server, ensure you have set up your environment variables in a `.env` file based on the `.env.example`. Then, execute the following command:
+To run the FastAPI server, ensure you have set up your environment variables in a `.env` file based on the [`.env.example`](.env.example). Then, execute the following command:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
@@ -44,12 +54,21 @@ python3 image_processing/process_image.py --green-lower 35 100 100 --green-upper
 This command sets the HSV thresholds for detecting green colors.
 
 ### Configuration File
-Alternatively, you can use a configuration file to define your settings. A sample `config.json` file is provided in the `config` directory:
+Alternatively, you can use a configuration file to define your settings. A sample [`config.json`](config/config.json) file is provided in the `config` directory:
 ```json
 {
     "green_lower": [35, 100, 100],
     "green_upper": [85, 255, 255],
     "red_lower1": [0, 100, 100],
+### Configuration Options
+The `config.json` file allows you to customize the color detection thresholds. Here are the options you can set:
+
+- `green_lower`: The lower HSV threshold for detecting green colors.
+- `green_upper`: The upper HSV threshold for detecting green colors.
+- `red_lower1` and `red_upper1`: The HSV thresholds for detecting red colors in one range.
+- `red_lower2` and `red_upper2`: The HSV thresholds for detecting red colors in another range.
+
+You can modify these values to suit your specific chart analysis needs.
     "red_upper1": [10, 255, 255],
     "red_lower2": [160, 100, 100],
     "red_upper2": [180, 255, 255]
