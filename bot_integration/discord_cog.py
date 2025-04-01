@@ -1,23 +1,11 @@
 import discord
 from discord.ext import commands
 import os
+
 from dotenv import load_dotenv
-
-import logging
-
-# Configure logging
-logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
-
-discord_token = os.getenv('DISCORD_TOKEN')
-
-# Initialize Discord bot with intents
-intents = discord.Intents.default()
-intents.message_content = True
-
-bot = commands.Bot(command_prefix='/', intents=intents)
 
 class ChartSayerCog(commands.Cog):
     def __init__(self, bot):
@@ -48,11 +36,20 @@ class ChartSayerCog(commands.Cog):
 
         # Send the analysis result
         await ctx.send(f"Analysis Result: {result}")
-logger.info('Adding ChartSayerCog to the bot')
 
+# Initialize Discord bot with intents
+intents = discord.Intents.default()
+intents.message_content = True
+
+discord_token = os.getenv('DISCORD_TOKEN')
+
+bot = commands.Bot(command_prefix='/', intents=intents)
 
 # Add the cog to the bot
-async def if __name__ == "__main__":
-    import asyncio
-    asyncio.run(setup_bot()):
+async def main():
     await bot.add_cog(ChartSayerCog(bot))
+    await bot.start(discord_token)
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(main())

@@ -1,19 +1,46 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 # Load environment variables from .env file
 load_dotenv()
 
 app = FastAPI()
 
-# Import Telegram and Discord routes
-from bot_integration.telegram_routes import router as telegram_router
-from bot_integration.discord_routes import router as discord_router
+import json
 
-# Include routers
-app.include_router(telegram_router)
-app.include_router(discord_router)
+# Load chart configuration
+config_path = "config/chart_config.json"
+with open(config_path, 'r') as file:
+    config = json.load(file)
+
+# Import Telegram and Discord routes conditionally
+if "telegram" in config["clients"]:
+    from bot_integration.telegram_routes import router as telegram_router
+    app.include_router(telegram_router)
+
+from contextlib import asynccontextmanager
+logger.info('Starting Discord bot')
+
+from bot_integration.discord_bot import bot
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    if "discord" in config["clients"]:
+        await bot.start(os.getenv('DISCORD_TOKEN'))
+        await bot.setup_bot()
+    try:
+        yield
+    finally:
+        await bot.close()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def read_root():

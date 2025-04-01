@@ -1,4 +1,5 @@
 {
+    "clients": ["discord"],
     "entry_color": "green",
     "stop_loss_color": "red",
     "take_profit_color": "blue",
