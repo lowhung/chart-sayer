@@ -3,7 +3,7 @@ import logging
 
 from fastapi import APIRouter, Request, Response, HTTPException, status
 
-from src.bot_integration.discord_bot import verify_discord_signature, process_discord_interaction
+from src.bots.discord_bot import verify_discord_signature, process_discord_interaction
 
 logger = logging.getLogger(__name__)
 

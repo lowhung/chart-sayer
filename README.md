@@ -55,7 +55,6 @@ Chart Sayer provides a convenient command-line interface for processing chart im
 You can use Poetry to run the CLI tool:
 
 ```bash
-# Process a chart image using Poetry's script runner
 poetry run analyze-chart <image_path> <config_path>
 ```
 

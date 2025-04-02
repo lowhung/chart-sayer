@@ -4,7 +4,7 @@ import logging
 from fastapi import APIRouter, Request, Response, HTTPException, status
 from telegram import Update
 
-from src.bot_integration.telegram_bot import bot, telegram_app
+from src.bots.telegram_bot import bot, telegram_app
 
 logger = logging.getLogger(__name__)
 
