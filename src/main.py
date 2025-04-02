@@ -8,10 +8,10 @@ from contextlib import asynccontextmanager
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
-from src.bot_integration.discord_bot import setup_bot as setup_discord_bot
-from src.bot_integration.discord_bot import shutdown_bot as shutdown_discord_bot
-from src.bot_integration.discord_bot import start_bot as start_discord_bot
-from src.bot_integration.telegram_bot import bot_manager, telegram_token
+from src.bots.discord_bot import setup_bot as setup_discord_bot
+from src.bots.discord_bot import shutdown_bot as shutdown_discord_bot
+from src.bots.discord_bot import start_bot as start_discord_bot
+from src.bots.telegram_bot import bot_manager, telegram_token
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 if "telegram" in config["clients"] and config.get("telegram", {}).get("webhook_mode", False):
-    from src.bot_integration.telegram_routes import router as telegram_router
+    from src.routes.telegram_routes import router as telegram_router
 
     app.include_router(telegram_router)
 
@@ -92,23 +92,6 @@ async def read_root():
     return {"message": "Welcome to Chart Sayer API!"}
 
 
-positions = {}
-
-
-@app.get("/get_positions/{user_id}")
-async def get_positions(user_id: str):
-    user_positions = positions.get(user_id, [])
-    return {"user_id": user_id, "positions": user_positions}
-
-
-@app.post("/close_position/{position_id}")
-async def close_position(position_id: str):
-    return {"status": "Position closed", "position_id": position_id}
-
-
-@app.post("/update_position/{position_id}")
-async def update_position(position_id: str):
-    return {"status": "Position updated", "position_id": position_id}
 
 
 if __name__ == "__main__":

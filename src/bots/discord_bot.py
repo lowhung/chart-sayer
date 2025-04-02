@@ -9,7 +9,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from fastapi import Request
 
-from src.bot_integration.discord_ui import SetupMenuView
+from src.bots.discord_ui import SetupMenuView
 from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 logger = logging.getLogger(__name__)
