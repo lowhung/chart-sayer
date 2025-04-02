@@ -95,6 +95,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                     "Sorry, I encountered an error analyzing your chart. Please try again."
                 )
 
+
         @self.chart_group.command(name="setup", description="Customize chart analysis settings")
         async def setup(interaction: Interaction):
             """Start the setup process for chart analysis configuration"""
@@ -144,6 +145,26 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 
         await ctx.send(f"Analysis Result: {result}")
 
+    @commands.command(name='resync')
+    @commands.is_owner()
+    async def resync(self, ctx):
+        """Resynchronizes application commands with Discord."""
+        await ctx.send("Resyncing application commands...")
+
+        try:
+            if guild_ids:
+                for guild_id in guild_ids:
+                    guild = Object(id=guild_id)
+                    await self.bot.tree.sync(guild=guild)
+                    await ctx.send(f"Command sync complete for guild {guild_id}")
+            else:
+                await self.bot.tree.sync()
+                await ctx.send("Global command sync complete")
+
+            await ctx.send("✅ All commands resynced successfully!")
+        except Exception as e:
+            logger.error(f"Error syncing commands: {e}")
+            await ctx.send(f"❌ Error during resync: {e}")
 
 @bot.event
 async def on_ready():
