@@ -4,7 +4,7 @@ import logging
 import os
 
 import aiohttp
-from discord import app_commands, Intents, Interaction, Attachment, Object
+from discord import app_commands, Intents, Interaction, Attachment, Object, Embed, Color
 from discord.ext import commands
 from dotenv import load_dotenv
 from fastapi import Request
@@ -39,16 +39,22 @@ def create_tracked_task(coro):
 
 
 class ChartSayerCog(commands.Cog, name="Chart Sayer"):
-    def __init__(self, bot):
-        self.bot = bot
+    def __init__(self, core_bot: commands.Bot):
+        self.bot = core_bot
 
         self.chart_group = app_commands.Group(
             name="chart",
             description="Chart analysis commands",
             guild_ids=guild_ids
         )
+        self.admin_group = app_commands.Group(
+            name="admin",
+            description="Admin commands",
+            guild_ids=guild_ids
+        )
 
         self.bot.tree.add_command(self.chart_group)
+        self.bot.tree.add_command(self.admin_group)
         self.user_configs = {}
         self.setup_commands()
 
@@ -60,10 +66,40 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
             await interaction.response.send_message('Hello! I am your Chart Sayer bot.')
 
         @self.chart_group.command(name="help", description="Get help with chart analysis")
-        async def help(interaction: Interaction):
-            await interaction.response.send_message(
-                'Send me a chart image to analyze using `/chart analyze` command.'
+        async def help_command(interaction: Interaction):
+            embed = Embed(
+                title="Chart Sayer - Trading Chart Analysis Bot",
+                description="I can analyze trading charts to identify key price levels and trading opportunities.",
+                color=Color.blue()
             )
+
+            embed.add_field(
+                name="📈 Chart Analysis",
+                value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
+                inline=False
+            )
+
+            embed.add_field(
+                name="⚙️ Custom Settings",
+                value="Use `/chart setup` to customize how I analyze your charts, including colors for entry/exit points and which indicators to prioritize.",
+                inline=False
+            )
+
+            embed.add_field(
+                name="📊 Supported Chart Types",
+                value="I can analyze most standard trading charts including candlestick, line, and bar charts from any platform.",
+                inline=False
+            )
+
+            embed.add_field(
+                name="🔍 Example Usage",
+                value="1. Take a screenshot of your chart\n2. Use `/chart analyze` and upload the image\n3. Receive entry, stop loss, and take profit levels",
+                inline=False
+            )
+
+            embed.set_footer(text="For more detailed help, visit our documentation or contact the bot administrator.")
+
+            await interaction.response.send_message(embed=embed)
 
         @self.chart_group.command(name="analyze", description="Analyze a chart image")
         async def analyze(interaction: Interaction, file: Attachment):
@@ -95,7 +131,6 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                     "Sorry, I encountered an error analyzing your chart. Please try again."
                 )
 
-
         @self.chart_group.command(name="setup", description="Customize chart analysis settings")
         async def setup(interaction: Interaction):
             """Start the setup process for chart analysis configuration"""
@@ -114,13 +149,66 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 ephemeral=True
             )
 
+        @self.admin_group.command(name="resync", description="Resync application commands")
+        async def resync(interaction: Interaction):
+            """Resynchronizes application commands with Discord."""
+            await interaction.response.send_message("Re-syncing application commands...")
+
+            try:
+                if guild_ids:
+                    for guild_id in guild_ids:
+                        guild = Object(id=guild_id)
+                        await self.bot.tree.sync(guild=guild)
+                        await interaction.edit_original_response(content=f"Command sync complete for guild {guild_id}")
+                else:
+                    await self.bot.tree.sync()
+                    await interaction.edit_original_response(content="Global command sync complete")
+
+                await interaction.edit_original_response(content="✅ All commands re-synced successfully!")
+            except Exception as e:
+                logger.error(f"Error syncing commands: {e}")
+                await interaction.edit_original_response(
+                    content=f"❌ There was an error during re-sync. Please contact support.")
+
     @commands.command(name='start')
     async def prefix_start(self, ctx):
         await ctx.send('Hello! I am your Chart Sayer bot.')
 
     @commands.command(name='chart_help')
     async def prefix_chart_help(self, ctx):
-        await ctx.send('Send me a chart image to analyze.')
+        embed = Embed(
+            title="Chart Sayer - Trading Chart Analysis Bot",
+            description="I can analyze trading charts to identify key price levels and trading opportunities.",
+            color=Color.blue()
+        )
+
+        embed.add_field(
+            name="📈 Chart Analysis",
+            value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
+            inline=False
+        )
+
+        embed.add_field(
+            name="⚙️ Custom Settings",
+            value="Use `/chart setup` to customize how I analyze your charts, including colors for entry/exit points and which indicators to prioritize.",
+            inline=False
+        )
+
+        embed.add_field(
+            name="📊 Supported Chart Types",
+            value="I can analyze most standard trading charts including candlestick, line, and bar charts from any platform.",
+            inline=False
+        )
+
+        embed.add_field(
+            name="🔍 Example Usage",
+            value="1. Take a screenshot of your chart\n2. Use `/chart analyze` and upload the image\n3. Receive entry, stop loss, and take profit levels",
+            inline=False
+        )
+
+        embed.set_footer(text="For more detailed help, visit our documentation or contact the bot administrator.")
+
+        await ctx.send(embed=embed)
 
     @commands.command(name='analyze')
     async def prefix_analyze(self, ctx):
@@ -147,7 +235,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 
     @commands.command(name='resync')
     @commands.is_owner()
-    async def resync(self, ctx):
+    async def prefix_resync(self, ctx):
         """Resynchronizes application commands with Discord."""
         await ctx.send("Resyncing application commands...")
 
@@ -165,6 +253,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         except Exception as e:
             logger.error(f"Error syncing commands: {e}")
             await ctx.send(f"❌ Error during resync: {e}")
+
 
 @bot.event
 async def on_ready():
