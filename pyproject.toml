@@ -1,25 +1,26 @@
-[project]
+[tool.poetry]
 name = "chart-sayer"
 version = "0.1.0"
-description = ""
+description = "Chart Sayer is a lightweight service designed to analyze chart images and extract key trading information such as entry and exit points based on user-defined rules. The service can be integrated with social platforms to automate the process of chart analysis and position management."
 authors = [
-    { name = "openhands", email = "openhands@all-hands.dev" },
-    { name = "lowhung", email = "hounslow@algalonlabs.com" }
+    "lowhung <hounslow@algalonlabs.com>",
+    "openhands <openhands@all-hands.dev>"
 ]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "fastapi (>=0.115.12,<0.116.0)",
-    "uvicorn (>=0.34.0,<0.35.0)",
-    "discord-py (>=2.5.2,<3.0.0)",
-    "python-dotenv (>=1.1.0,<2.0.0)",
-    "openai (>=1.70.0,<2.0.0)",
-    "python-telegram-bot (>=22.0,<23.0)"
-]
-
-
-[build-system]
 packages = [{ include = "src" }]
 
+[tool.poetry.dependencies]
+python = ">=3.12"
+fastapi = ">=0.115.12,<0.116.0"
+uvicorn = ">=0.34.0,<0.35.0"
+discord-py = ">=2.5.2,<3.0.0"
+python-dotenv = ">=1.1.0,<2.0.0"
+openai = ">=1.70.0,<2.0.0"
+python-telegram-bot = ">=22.0,<23.0"
+
+[tool.poetry.scripts]
+analyze-chart = "src.cli:main"
+
+[build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"

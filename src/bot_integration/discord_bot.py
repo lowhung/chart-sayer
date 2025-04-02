@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 
@@ -8,6 +9,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from fastapi import Request
 
+from src.bot_integration.discord_ui import SetupMenuView
 from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 logger = logging.getLogger(__name__)
@@ -47,7 +49,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         )
 
         self.bot.tree.add_command(self.chart_group)
-
+        self.user_configs = {}
         self.setup_commands()
 
     def setup_commands(self):
@@ -65,7 +67,6 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 
         @self.chart_group.command(name="analyze", description="Analyze a chart image")
         async def analyze(interaction: Interaction, file: Attachment):
-
             if not file.content_type or not file.content_type.startswith('image/'):
                 await interaction.response.send_message(
                     "Please upload an image file. This doesn't appear to be an image."
@@ -75,12 +76,16 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
             await interaction.response.defer(thinking=True)
 
             try:
-
                 image_path = f"/tmp/{file.filename}"
                 await file.save(image_path)
 
+                user_id = str(interaction.user.id)
                 config_path = "src/config/chart_config.json"
-                result = process_chart_with_gpt4o(image_path, config_path)
+
+                if user_id in self.user_configs:
+                    result = process_chart_with_gpt4o(image_path, config_path, user_config=self.user_configs[user_id])
+                else:
+                    result = process_chart_with_gpt4o(image_path, config_path)
 
                 await interaction.followup.send(f"Analysis Result: {result}")
 
@@ -89,6 +94,24 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 await interaction.followup.send(
                     "Sorry, I encountered an error analyzing your chart. Please try again."
                 )
+
+        @self.chart_group.command(name="setup", description="Customize chart analysis settings")
+        async def setup(interaction: Interaction):
+            """Start the setup process for chart analysis configuration"""
+            config_path = "src/config/chart_config.json"
+            with open(config_path, 'r') as file:
+                default_config = json.load(file)
+
+            user_id = str(interaction.user.id)
+            if user_id not in self.user_configs:
+                self.user_configs[user_id] = default_config.copy()
+
+            view = SetupMenuView(self, user_id)
+            await interaction.response.send_message(
+                "Welcome to Chart Sayer Setup! Select an option to configure:",
+                view=view,
+                ephemeral=True
+            )
 
     @commands.command(name='start')
     async def prefix_start(self, ctx):
@@ -108,8 +131,16 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         image_path = f"/tmp/{attachment.filename}"
         await attachment.save(image_path)
 
+        # Use user-specific config if available
+        user_id = str(ctx.author.id)
         config_path = "src/config/chart_config.json"
-        result = process_chart_with_gpt4o(image_path, config_path)
+
+        if user_id in self.user_configs:
+
+            result = process_chart_with_gpt4o(image_path, config_path, user_config=self.user_configs[user_id])
+        else:
+
+            result = process_chart_with_gpt4o(image_path, config_path)
 
         await ctx.send(f"Analysis Result: {result}")
 
@@ -210,19 +241,15 @@ async def setup_discord_webhook(public_key):
     """Set up configuration for Discord webhook interactions."""
     logger.info("Initializing Discord for webhook interactions")
 
-    # We'll need the bot object to be initialized, but we won't connect to the gateway
     global bot
 
     if not bot:
-        # Initialize Discord bot with intents
         intents = Intents.default()
         intents.message_content = True
         bot = commands.Bot(command_prefix='/', intents=intents)
 
-        # Set up the cogs and commands
         await setup_bot()
 
-    # Store the public key for verification
     bot.public_key = public_key
 
     return bot
@@ -273,12 +300,10 @@ async def process_discord_interaction(interaction_data):
             }
         }
 
-        # Start a background task to handle the command
         asyncio.create_task(handle_command(interaction_data))
 
         return response
 
-    # Handle other interaction types
     else:
         logger.warning(f"Unhandled interaction type: {interaction_data['type']}")
         return {
@@ -297,13 +322,11 @@ async def handle_command(interaction_data):
         interaction_id = interaction_data['id']
         interaction_token = interaction_data['token']
 
-        # Process different commands
         if command_name == "start":
             content = "Hello! I am your Chart Sayer bot."
         elif command_name == "chart_help":
             content = "Send me a chart image to analyze."
         elif command_name == "analyze":
-            # This would need special handling for attachments
             content = "Please upload your chart image in a follow-up message."
         else:
             content = f"Unknown command: {command_name}"
