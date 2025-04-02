@@ -1,7 +1,6 @@
 {
   "clients": [
-    "discord",
-    "telegram"
+    "discord"
   ],
   "entry_color": "green",
   "stop_loss_color": "red",
