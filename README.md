@@ -2,16 +2,14 @@
 
 Chart Sayer is a lightweight service designed to analyze chart images and extract key trading information such as entry
 and exit points based on user-defined rules. The service can be integrated with platforms like Discord and Telegram to
-automate the process of chart analysis and position management.
+automate the process of chart analysis.
 
 ## Features
 
 - **Image Processing**: Analyze chart images to detect entry and exit points using machine vision and OCR.
 - **Bot Integration**: Seamlessly integrate with Discord and Telegram to receive and process chart images.
 - **Customizable Rules**: Define custom rules for interpreting chart features, such as color codes for entry and exit points.
-- **Position Management**: Maintain a ledger of positions per user, allowing for easy tracking, updating, and querying.
-- **Multi-Platform Support**: Generic position management system works with both Discord and Telegram.
-- **Redis Integration**: Store position data in Redis for persistence and fast access.
+
 
 ## Installation
 
@@ -36,7 +34,7 @@ Ensure you have the following environment variables set in your `.env` file:
 - `DISCORD_CLIENT_SECRET`: Your Discord client secret.
 - `DISCORD_PUBLIC_KEY`: Your Discord public key.
 - `OPENAI_API_KEY`: Your OpenAI API key.
-- `REDIS_URL`: Your Redis URL (default: `redis://localhost:6379/0`).
+
 
 ## Usage
 
@@ -49,22 +47,9 @@ To run the FastAPI server, ensure you have set up your environment variables in 
 poetry run uvicorn src.main:app --host 0.0.0.0 --port 8000
 ```
 
-This will start the server, allowing you to interact with the API endpoints for Telegram and Discord bot integration, as well as position management.
+This will start the server, allowing you to interact with the API endpoints for Telegram and Discord bot integration.
 
-### Position Management API
 
-Chart Sayer provides a RESTful API for managing trading positions. Here are some of the key endpoints:
-
-- `POST /positions`: Create a new position
-- `GET /positions/{position_id}`: Get a position by ID
-- `PATCH /positions/{position_id}`: Update a position
-- `DELETE /positions/{position_id}`: Stop a position (soft-delete)
-- `POST /positions/{position_id}/close`: Close a position
-- `GET /positions/user/{platform}/{user_id}`: Get all positions for a user
-- `GET /positions/user/{platform}/{user_id}/active`: Get active positions for a user
-- `GET /positions/user/{platform}/{user_id}/summary`: Get a summary of positions for a user
-
-The position management system is platform-agnostic and works with both Discord and Telegram. It stores positions in Redis for persistence and fast access.
 
 ### Command-Line Interface
 
@@ -138,7 +123,6 @@ options you can set:
 - `telegram`: Configuration specific to the Telegram bot, including `webhook_mode` and `webhook_url`.
 - `discord`: Configuration specific to the Discord bot, including `gateway_mode` and `webhook_mode`.
 - `image_processing`: Settings for image processing, including the `model` and `max_tokens`.
-- `redis`: Redis configuration, including `enabled` and `store_positions` flags.
 
 These options allow you to tailor the bot's functionality to your specific needs.
 
