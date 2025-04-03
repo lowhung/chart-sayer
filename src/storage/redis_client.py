@@ -2,6 +2,7 @@ import json
 import logging
 import os
 from typing import Any, Dict, List, Optional, Set, Union
+from uuid import UUID
 
 from dotenv import load_dotenv
 
@@ -12,6 +13,14 @@ from redis.exceptions import RedisError
 logger = logging.getLogger(__name__)
 
 load_dotenv()
+
+class UUIDEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles UUID objects."""
+    def default(self, obj):
+        if isinstance(obj, UUID):
+            return str(obj)
+        return super().default(obj)
+
 
 class RedisClient:
     """Redis client for managing positions and other data."""
@@ -50,7 +59,7 @@ class RedisClient:
         """Set a JSON value in Redis."""
         try:
             async with await self.get_redis() as conn:
-                await conn.set(key, json.dumps(data))
+                await conn.set(key, json.dumps(data, cls=UUIDEncoder))
                 if ttl:
                     await conn.expire(key, ttl)
                 return True

@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Dict, List, Optional, Union
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 
 class PlatformType(str, Enum):
@@ -27,6 +27,8 @@ class PositionType(str, Enum):
 
 class Position(BaseModel):
     """Model representing a trading position."""
+    
+    model_config = ConfigDict(json_encoders={UUID: str, datetime: lambda dt: dt.isoformat()})
     
     id: UUID = Field(default_factory=uuid4)
     user_id: str  # Either discord_id or telegram_id
@@ -70,7 +72,7 @@ class Position(BaseModel):
     
     def to_dict(self) -> Dict:
         """Convert the position to a dictionary."""
-        return self.model_dump()
+        return self.model_dump(mode='json')
 
 
 class PositionCreate(BaseModel):
