@@ -13,6 +13,25 @@ automate the process of chart analysis.
 
 ## Installation
 
+### Method 1: Using Docker (Recommended)
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/lowhung/chart-sayer.git
+   cd chart-sayer
+   ```
+
+2. Create an `.env` file based on `.env.example`.
+
+3. Run with Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+
+   This will start both the Chart Sayer service and a Redis instance.
+
+### Method 2: Manual Installation
+
 1. Clone the repository:
    ```bash
    git clone https://github.com/lowhung/chart-sayer.git
@@ -22,6 +41,12 @@ automate the process of chart analysis.
 2. Install the required dependencies:
    ```bash
    poetry install
+   ```
+
+3. Set up a Redis instance (optional, for position storage):
+   ```bash
+   # Install Redis on your system or use a cloud-hosted instance
+   # Update the REDIS_URL in your .env file accordingly
    ```
 
 ## Environment Variables
@@ -34,11 +59,32 @@ Ensure you have the following environment variables set in your `.env` file:
 - `DISCORD_CLIENT_SECRET`: Your Discord client secret.
 - `DISCORD_PUBLIC_KEY`: Your Discord public key.
 - `OPENAI_API_KEY`: Your OpenAI API key.
+- `REDIS_URL`: URL for the Redis connection (default: `redis://localhost:6379/0`, or `redis://redis:6379/0` when using Docker).
 
 
 ## Usage
 
-### Running the FastAPI Server
+### Using Docker Compose
+
+The easiest way to run Chart Sayer is using Docker Compose:
+
+```bash
+# Start the services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the services
+docker-compose down
+
+# Rebuild and restart after making changes
+docker-compose up -d --build
+```
+
+This will start the FastAPI server on port 8000 and a Redis instance on port 6379. You can access the API at http://localhost:8000.
+
+### Running the FastAPI Server Manually
 
 To run the FastAPI server, ensure you have set up your environment variables in a `.env` file based on the [
 `.env.example`](.env.example). Then, execute the following command:
@@ -123,6 +169,7 @@ options you can set:
 - `telegram`: Configuration specific to the Telegram bot, including `webhook_mode` and `webhook_url`.
 - `discord`: Configuration specific to the Discord bot, including `gateway_mode` and `webhook_mode`.
 - `image_processing`: Settings for image processing, including the `model` and `max_tokens`.
+- `redis`: Configuration for Redis, including `enabled` flag.
 
 These options allow you to tailor the bot's functionality to your specific needs.
 

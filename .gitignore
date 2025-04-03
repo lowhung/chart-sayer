@@ -1,3 +1,6 @@
+# Docker volumes
+redis-data/
+
 __pycache__/
 detected_*.png
 
