@@ -37,7 +37,7 @@ class PositionRepository:
         
         # Save the position
         position_key = self._get_position_key(position.id)
-        await self.redis.set_json(position_key, position.model_dump())
+        await self.redis.set_json(position_key, position.model_dump(mode='json'))
         
         # Add the position to the user's positions set
         user_positions_key = self._get_user_positions_key(position.user_id, position.platform)
@@ -70,7 +70,7 @@ class PositionRepository:
         
         # Save the updated position
         position_key = self._get_position_key(position.id)
-        await self.redis.set_json(position_key, position.model_dump())
+        await self.redis.set_json(position_key, position.model_dump(mode='json'))
         
         logger.info(f"Updated position {position.id} for user {position.user_id}")
         return position
@@ -87,7 +87,7 @@ class PositionRepository:
         
         # Save the updated position
         position_key = self._get_position_key(position.id)
-        await self.redis.set_json(position_key, position.model_dump())
+        await self.redis.set_json(position_key, position.model_dump(mode='json'))
         
         logger.info(f"Stopped position {position.id} for user {position.user_id}")
         return position
@@ -106,7 +106,7 @@ class PositionRepository:
         
         # Save the updated position
         position_key = self._get_position_key(position.id)
-        await self.redis.set_json(position_key, position.model_dump())
+        await self.redis.set_json(position_key, position.model_dump(mode='json'))
         
         logger.info(f"Closed position {position.id} for user {position.user_id}")
         return position
