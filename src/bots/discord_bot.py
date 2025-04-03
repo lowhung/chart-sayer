@@ -276,6 +276,14 @@ async def setup_bot():
         logger.info("Position commands loaded successfully")
     except Exception as e:
         logger.error(f"Error loading position commands: {e}")
+        
+    # Load price commands
+    try:
+        from src.bots.commands.price_commands import PriceCommands
+        await bot.add_cog(PriceCommands(bot))
+        logger.info("Price commands loaded successfully")
+    except Exception as e:
+        logger.error(f"Error loading price commands: {e}")
 
     logger.info("Bot cogs setup complete")
 
