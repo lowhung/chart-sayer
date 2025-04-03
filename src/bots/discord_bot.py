@@ -268,7 +268,7 @@ async def setup_bot():
     logger.info("Setting up bot cogs...")
 
     await bot.add_cog(ChartSayerCog(bot))
-    
+
     # Load position commands
     try:
         from src.bots.commands.position_commands import PositionCommands
@@ -276,7 +276,7 @@ async def setup_bot():
         logger.info("Position commands loaded successfully")
     except Exception as e:
         logger.error(f"Error loading position commands: {e}")
-        
+
     # Load price commands
     try:
         from src.bots.commands.price_commands import PriceCommands
