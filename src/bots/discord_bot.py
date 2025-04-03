@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from fastapi import Request
 
 from src.bots.discord_ui import SetupMenuView
+from src.bots.chart_rendering.tradingview import send_tradingview_chart, CHART_TIMEFRAMES, CHART_INDICATORS
 from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 logger = logging.getLogger(__name__)
@@ -76,6 +77,12 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
             embed.add_field(
                 name="📈 Chart Analysis",
                 value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
+                inline=False
+            )
+
+            embed.add_field(
+                name="📊 TradingView Charts",
+                value="Use `/chart tradingview <symbol>` to display an interactive TradingView chart with custom timeframes and indicators.",
                 inline=False
             )
 
@@ -148,6 +155,45 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 view=view,
                 ephemeral=True
             )
+            
+        @self.chart_group.command(name="tradingview", description="Display a TradingView chart")
+        @app_commands.describe(
+            symbol="Trading pair symbol (e.g., BTCUSDT)",
+            timeframe="Chart timeframe (default: 1d)",
+            theme="Chart theme/color scheme (default: dark)",
+            indicators="Comma-separated list of indicators (e.g., volume,rsi,macd)",
+        )
+        @app_commands.choices(
+            timeframe=[
+                app_commands.Choice(name=k.upper(), value=k) 
+                for k in CHART_TIMEFRAMES.keys()
+            ],
+            theme=[
+                app_commands.Choice(name="Dark", value="dark"),
+                app_commands.Choice(name="Light", value="light"),
+                app_commands.Choice(name="Colored", value="colored"),
+            ]
+        )
+        async def tradingview(interaction: Interaction, 
+                           symbol: str,
+                           timeframe: str = "1d",
+                           theme: str = "dark",
+                           indicators: str = ""):
+            """Display a TradingView chart for a symbol."""
+            await interaction.response.defer()
+            
+            # Parse indicators list
+            indicator_list = [i.strip() for i in indicators.split(",")] if indicators else []
+            # Filter out invalid indicators
+            indicator_list = [ind for ind in indicator_list if ind in CHART_INDICATORS]
+            
+            await send_tradingview_chart(
+                interaction=interaction,
+                symbol=symbol,
+                timeframe=timeframe,
+                theme=theme,
+                indicators=indicator_list,
+            )
 
         @self.admin_group.command(name="resync", description="Resync application commands")
         async def resync(interaction: Interaction):
@@ -185,6 +231,12 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         embed.add_field(
             name="📈 Chart Analysis",
             value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
+            inline=False
+        )
+
+        embed.add_field(
+            name="📊 TradingView Charts",
+            value="Use `/chart tradingview <symbol>` to display an interactive TradingView chart with custom timeframes and indicators.",
             inline=False
         )
 
