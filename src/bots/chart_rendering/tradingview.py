@@ -1,17 +1,13 @@
 """
 TradingView chart rendering functionality for Discord bot.
 """
-import base64
 import logging
 import urllib.parse
-from typing import Dict, List, Optional, Union
+from io import BytesIO
+from typing import List, Optional
 
 import discord
-from discord import Embed, Color, File
-from io import BytesIO
-import requests
-from PIL import Image
-import aiohttp
+from discord import Embed, Color
 
 logger = logging.getLogger(__name__)
 
@@ -56,12 +52,12 @@ CHART_INDICATORS = {
 
 
 async def generate_tradingview_url(
-    symbol: str,
-    timeframe: str = "1d",
-    theme: str = "dark",
-    indicators: Optional[List[str]] = None,
-    width: int = 800,
-    height: int = 500,
+        symbol: str,
+        timeframe: str = "1d",
+        theme: str = "dark",
+        indicators: Optional[List[str]] = None,
+        width: int = 800,
+        height: int = 500,
 ) -> str:
     """
     Generate a TradingView chart URL for the given symbol and parameters.
@@ -85,16 +81,16 @@ async def generate_tradingview_url(
         # Add default exchange for common stocks
         elif symbol.isalpha():
             symbol = f"NASDAQ:{symbol}"
-    
+
     # Get the timeframe code
     tf_code = CHART_TIMEFRAMES.get(timeframe, "D")
-    
+
     # Get the theme
     chart_theme = CHART_COLOR_SCHEMES.get(theme, "dark")
-    
+
     # Base URL for the TradingView widget
     base_url = "https://s.tradingview.com/widgetembed/"
-    
+
     # Parameters for the TradingView widget
     params = {
         "symbol": symbol,
@@ -112,25 +108,25 @@ async def generate_tradingview_url(
         "width": str(width),
         "height": str(height),
     }
-    
+
     # Encode parameters
     encoded_params = urllib.parse.urlencode(params)
-    
+
     # Generate the final URL
     final_url = f"{base_url}?{encoded_params}"
-    
+
     return final_url
 
 
 async def create_tradingview_embed(
-    symbol: str,
-    timeframe: str = "1d",
-    theme: str = "dark",
-    indicators: Optional[List[str]] = None,
-    title: Optional[str] = None,
-    description: Optional[str] = None,
-    width: int = 800,
-    height: int = 500,
+        symbol: str,
+        timeframe: str = "1d",
+        theme: str = "dark",
+        indicators: Optional[List[str]] = None,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        width: int = 800,
+        height: int = 500,
 ) -> Embed:
     """
     Create a Discord embed for a TradingView chart.
@@ -157,11 +153,11 @@ async def create_tradingview_embed(
         width=width,
         height=height,
     )
-    
+
     # Create default title if not provided
     if not title:
         title = f"{symbol} ({timeframe.upper()}) Chart"
-    
+
     # Create embed
     embed = Embed(
         title=title,
@@ -169,30 +165,30 @@ async def create_tradingview_embed(
         color=Color.blue() if theme == "light" else Color.darker_grey(),
         url=tv_url,
     )
-    
+
     # Add TradingView logo and credit
     embed.set_footer(
         text="Powered by TradingView",
         icon_url="https://static.tradingview.com/static/images/favicon.ico",
     )
-    
+
     # Add URL to the embed
     embed.add_field(
         name="Interactive Chart",
         value=f"[Open in TradingView]({tv_url})",
         inline=False,
     )
-    
+
     return embed
 
 
 async def render_tradingview_image(
-    symbol: str,
-    timeframe: str = "1d",
-    theme: str = "dark",
-    indicators: Optional[List[str]] = None,
-    width: int = 800,
-    height: int = 500,
+        symbol: str,
+        timeframe: str = "1d",
+        theme: str = "dark",
+        indicators: Optional[List[str]] = None,
+        width: int = 800,
+        height: int = 500,
 ) -> Optional[BytesIO]:
     """
     Render a TradingView chart as an image and return it as a BytesIO object.
@@ -220,15 +216,15 @@ async def render_tradingview_image(
 
 
 async def send_tradingview_chart(
-    interaction: discord.Interaction,
-    symbol: str,
-    timeframe: str = "1d",
-    theme: str = "dark",
-    indicators: Optional[List[str]] = None,
-    title: Optional[str] = None,
-    description: Optional[str] = None,
-    width: int = 800,
-    height: int = 500,
+        interaction: discord.Interaction,
+        symbol: str,
+        timeframe: str = "1d",
+        theme: str = "dark",
+        indicators: Optional[List[str]] = None,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        width: int = 800,
+        height: int = 500,
 ) -> None:
     """
     Send a TradingView chart embed to a Discord channel.
@@ -256,10 +252,10 @@ async def send_tradingview_chart(
             width=width,
             height=height,
         )
-        
+
         # Send the embed
         await interaction.followup.send(embed=embed)
-        
+
         logger.info(f"Sent TradingView chart for {symbol} ({timeframe}) to Discord")
     except Exception as e:
         logger.error(f"Error sending TradingView chart: {e}")
