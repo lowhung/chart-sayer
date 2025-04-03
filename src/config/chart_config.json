@@ -21,5 +21,9 @@
   "image_processing": {
     "model": "gpt-4o",
     "max_tokens": 500
+  },
+  "redis": {
+    "enabled": true,
+    "store_positions": true
   }
 }

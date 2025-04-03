@@ -12,6 +12,7 @@ from src.bots.discord_bot import setup_bot as setup_discord_bot
 from src.bots.discord_bot import shutdown_bot as shutdown_discord_bot
 from src.bots.discord_bot import start_bot as start_discord_bot
 from src.bots.telegram_bot import bot_manager, telegram_token
+from src.storage.redis_client import RedisClient
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -81,10 +82,16 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Initialize Redis client
+redis_client = RedisClient()
+
 if "telegram" in config["clients"] and config.get("telegram", {}).get("webhook_mode", False):
     from src.routes.telegram_routes import router as telegram_router
-
     app.include_router(telegram_router)
+
+# Include positions router
+from src.routes.positions.router import router as positions_router
+app.include_router(positions_router)
 
 
 @app.get("/")
