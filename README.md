@@ -84,6 +84,8 @@ docker-compose up -d --build
 
 This will start the FastAPI server on port 8000 and a Redis instance on port 6379. You can access the API at http://localhost:8000.
 
+The setup also includes Redis Commander, a web-based Redis management tool, which you can access at http://localhost:8081.
+
 ### Running the FastAPI Server Manually
 
 To run the FastAPI server, ensure you have set up your environment variables in a `.env` file based on the [
