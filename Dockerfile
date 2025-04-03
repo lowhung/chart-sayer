@@ -5,6 +5,7 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install poetry
@@ -16,8 +17,9 @@ COPY pyproject.toml poetry.lock* /app/
 # Configure poetry to not use virtualenvs inside the container
 RUN poetry config virtualenvs.create false
 
-# Install dependencies
-RUN poetry install --no-interaction --no-ansi --no-dev
+# Regenerate lock file if needed and install dependencies
+RUN if [ ! -f poetry.lock ]; then poetry lock; fi
+RUN poetry install --no-interaction --no-ansi --only main
 
 # Copy the rest of the application
 COPY . /app/
