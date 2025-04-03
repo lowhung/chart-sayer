@@ -17,6 +17,8 @@ discord-py = ">=2.5.2,<3.0.0"
 python-dotenv = ">=1.1.0,<2.0.0"
 openai = ">=1.70.0,<2.0.0"
 python-telegram-bot = ">=22.0,<23.0"
+redis = ">=5.0.1,<6.0.0"
+pydantic = ">=2.6.0,<3.0.0"
 
 [tool.poetry.scripts]
 analyze-chart = "src.cli:main"
