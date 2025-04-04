@@ -73,9 +73,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         async def start(interaction: Interaction):
             await interaction.response.send_message("Hello! I am your Chart Sayer bot.")
 
-        @self.chart_group.command(
-            name="help", description="Get help with chart analysis"
-        )
+        @self.chart_group.command(name="help", description="Get help with chart analysis")
         async def help_command(interaction: Interaction):
             embed = Embed(
                 title="Chart Sayer - Trading Chart Analysis Bot",
@@ -173,9 +171,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                                         f" Use `/position {position_id}` to see details."
                                     )
                             except discord.errors.Forbidden as e:
-                                logger.error(
-                                    f"Permission error when announcing position: {e}"
-                                )
+                                logger.error(f"Permission error when announcing position: {e}")
                                 # Still notify the user of successful creation, just in the ephemeral message
                                 await interaction.followup.send(
                                     f"Position created successfully, but I couldn't announce it in the channel due to missing permissions.",
@@ -186,9 +182,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                                 logger.error(f"Error announcing position: {e}")
 
                     # Create the position creation view
-                    view = PositionCreationView(
-                        user_id, result, on_complete=on_position_created
-                    )
+                    view = PositionCreationView(user_id, result, on_complete=on_position_created)
 
                     # Send the view as a followup message
                     await interaction.followup.send(
@@ -215,9 +209,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                     "Sorry, I encountered an error analyzing your chart. Please try again."
                 )
 
-        @self.chart_group.command(
-            name="setup", description="Customize chart analysis settings"
-        )
+        @self.chart_group.command(name="setup", description="Customize chart analysis settings")
         async def setup(interaction: Interaction):
             """Start the setup process for chart analysis configuration"""
             config_path = "src/config/chart_config.json"
@@ -235,14 +227,10 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 ephemeral=True,
             )
 
-        @self.admin_group.command(
-            name="resync", description="Resync application commands"
-        )
+        @self.admin_group.command(name="resync", description="Resync application commands")
         async def resync(interaction: Interaction):
             """Resynchronizes application commands with Discord."""
-            await interaction.response.send_message(
-                "Re-syncing application commands..."
-            )
+            await interaction.response.send_message("Re-syncing application commands...")
 
             try:
                 if guild_ids:
@@ -254,9 +242,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                         )
                 else:
                     await self.bot.tree.sync()
-                    await interaction.edit_original_response(
-                        content="Global command sync complete"
-                    )
+                    await interaction.edit_original_response(content="Global command sync complete")
 
                 await interaction.edit_original_response(
                     content="✅ All commands re-synced successfully!"
@@ -376,9 +362,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                         logger.error(f"Error announcing position: {e}")
 
             # Create the position creation view
-            view = PositionCreationView(
-                user_id, result, on_complete=on_position_created
-            )
+            view = PositionCreationView(user_id, result, on_complete=on_position_created)
 
             # Send the view as a followup message
             await interaction.followup.send(
@@ -629,9 +613,7 @@ async def handle_command(interaction_data):
         payload = {"content": content}
 
         async with aiohttp.ClientSession() as session:
-            async with session.patch(
-                webhook_url, json=payload, headers=headers
-            ) as response:
+            async with session.patch(webhook_url, json=payload, headers=headers) as response:
                 if response.status != 200:
                     error_text = await response.text()
                     logger.error(f"Error sending Discord response: {error_text}")

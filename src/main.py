@@ -58,9 +58,7 @@ async def lifespan(app: FastAPI):
 
             if telegram_config.get("webhook_mode", False):
                 webhook_url = telegram_config.get("webhook_url")
-                await bot_manager.start_bot(
-                    telegram_token, polling=False, webhook_url=webhook_url
-                )
+                await bot_manager.start_bot(telegram_token, polling=False, webhook_url=webhook_url)
             else:
                 await bot_manager.start_bot(telegram_token, polling=True)
 
@@ -87,9 +85,7 @@ app = FastAPI(lifespan=lifespan)
 # Initialize Redis client
 redis_client = RedisClient()
 
-if "telegram" in config["clients"] and config.get("telegram", {}).get(
-    "webhook_mode", False
-):
+if "telegram" in config["clients"] and config.get("telegram", {}).get("webhook_mode", False):
     from src.routes.telegram_routes import router as telegram_router
 
     app.include_router(telegram_router)

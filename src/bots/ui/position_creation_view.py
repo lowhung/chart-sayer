@@ -61,10 +61,7 @@ class PositionCreationView(ui.View):
         }
 
         # Add buttons based on extracted data
-        if (
-            not self.position_data["symbol"]
-            or self.position_data["symbol"] == "UNKNOWN"
-        ):
+        if not self.position_data["symbol"] or self.position_data["symbol"] == "UNKNOWN":
             # If symbol is unknown, add a button to set it
             self.add_item(
                 ui.Button(
@@ -85,9 +82,10 @@ class PositionCreationView(ui.View):
             )
 
         # Add type selection if it wasn't detected
-        if not self.position_data["position_type"] or self.position_data[
-            "position_type"
-        ] not in ["long", "short"]:
+        if not self.position_data["position_type"] or self.position_data["position_type"] not in [
+            "long",
+            "short",
+        ]:
             self.add_item(PositionTypeSelect(self.unique_id))
 
         # Add confirmation button if we have the minimum required data
@@ -122,9 +120,7 @@ class PositionCreationView(ui.View):
         data = {}
 
         # Try to extract symbol
-        symbol_match = re.search(
-            r"Symbol:?\s+([A-Z0-9]+)", analysis_result, re.IGNORECASE
-        )
+        symbol_match = re.search(r"Symbol:?\s+([A-Z0-9]+)", analysis_result, re.IGNORECASE)
         if symbol_match:
             data["symbol"] = symbol_match.group(1).upper()
         elif "BTC" in analysis_result or "Bitcoin" in analysis_result:
@@ -163,29 +159,13 @@ class PositionCreationView(ui.View):
             data["position_type"] = "short"
         else:
             # If we have entry and take profit/stop loss, try to determine direction
-            if (
-                "entry" in data
-                and "take_profit" in data
-                and data["take_profit"] > data["entry"]
-            ):
+            if "entry" in data and "take_profit" in data and data["take_profit"] > data["entry"]:
                 data["position_type"] = "long"
-            elif (
-                "entry" in data
-                and "take_profit" in data
-                and data["take_profit"] < data["entry"]
-            ):
+            elif "entry" in data and "take_profit" in data and data["take_profit"] < data["entry"]:
                 data["position_type"] = "short"
-            elif (
-                "entry" in data
-                and "stop_loss" in data
-                and data["stop_loss"] < data["entry"]
-            ):
+            elif "entry" in data and "stop_loss" in data and data["stop_loss"] < data["entry"]:
                 data["position_type"] = "long"
-            elif (
-                "entry" in data
-                and "stop_loss" in data
-                and data["stop_loss"] > data["entry"]
-            ):
+            elif "entry" in data and "stop_loss" in data and data["stop_loss"] > data["entry"]:
                 data["position_type"] = "short"
             else:
                 # Default to long if we can't determine
@@ -357,9 +337,7 @@ class PositionTypeSelect(ui.Select):
 
         # Add create button if we have the minimum required data
         if self.has_minimum_data():
-            has_create_button = any(
-                item.label == "Create Position" for item in view.children
-            )
+            has_create_button = any(item.label == "Create Position" for item in view.children)
             if not has_create_button:
                 view.add_item(
                     ui.Button(
@@ -457,9 +435,7 @@ class EntryPriceModal(ui.Modal, title="Set Entry Price"):
             self.parent_view.position_data["entry"] = entry_price
 
             # Send confirmation message
-            await interaction.followup.send(
-                f"Entry price set to: {entry_price}", ephemeral=True
-            )
+            await interaction.followup.send(f"Entry price set to: {entry_price}", ephemeral=True)
 
             # Remove the set entry button
             buttons_to_remove = []
@@ -474,8 +450,7 @@ class EntryPriceModal(ui.Modal, title="Set Entry Price"):
             if self.parent_view.has_minimum_data():
                 # Check if we already have a create button
                 has_create_button = any(
-                    item.custom_id == "create_position"
-                    for item in self.parent_view.children
+                    item.custom_id == "create_position" for item in self.parent_view.children
                 )
                 if not has_create_button:
                     self.parent_view.add_item(
