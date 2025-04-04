@@ -14,7 +14,9 @@ class SetupMenuView(ui.View):
         placeholder="Select a setting to configure",
         options=[
             SelectOption(
-                label="Entry Color", description="Set color for entry points", value="entry_color"
+                label="Entry Color",
+                description="Set color for entry points",
+                value="entry_color",
             ),
             SelectOption(
                 label="Stop Loss Color",
@@ -47,12 +49,16 @@ class SetupMenuView(ui.View):
                 content="Select the color to use for entry points:", view=view
             )
         elif setting == "stop_loss_color":
-            view = ColorSelectView(self.cog, self.user_id, "stop_loss_color", "Stop Loss")
+            view = ColorSelectView(
+                self.cog, self.user_id, "stop_loss_color", "Stop Loss"
+            )
             await interaction.response.edit_message(
                 content="Select the color to use for stop loss points:", view=view
             )
         elif setting == "take_profit_color":
-            view = ColorSelectView(self.cog, self.user_id, "take_profit_color", "Take Profit")
+            view = ColorSelectView(
+                self.cog, self.user_id, "take_profit_color", "Take Profit"
+            )
             await interaction.response.edit_message(
                 content="Select the color to use for take profit points:", view=view
             )

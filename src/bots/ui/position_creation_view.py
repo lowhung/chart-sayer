@@ -1,6 +1,7 @@
 """
 UI components for conversational position creation in Discord.
 """
+
 import logging
 import re
 import time
@@ -8,7 +9,10 @@ from typing import Dict, Optional, Any, Callable, Awaitable
 
 from discord import ui, ButtonStyle, Interaction, SelectOption
 
-from src.bots.utils.position_utils import create_position_from_chart_data, get_position_details
+from src.bots.utils.position_utils import (
+    create_position_from_chart_data,
+    get_position_details,
+)
 from src.positions.models import PlatformType
 
 logger = logging.getLogger(__name__)
@@ -21,14 +25,16 @@ class PositionCreationView(ui.View):
     detected entry, stop loss, and take profit levels before creating a position.
     """
 
-    def __init__(self,
-                 user_id: str,
-                 analysis_result: str,
-                 timeout: Optional[float] = 180.0,
-                 on_complete: Optional[Callable[[Optional[str]], Awaitable[None]]] = None):
+    def __init__(
+        self,
+        user_id: str,
+        analysis_result: str,
+        timeout: Optional[float] = 180.0,
+        on_complete: Optional[Callable[[Optional[str]], Awaitable[None]]] = None,
+    ):
         """
         Initialize the position creation view.
-        
+
         Args:
             user_id: The Discord user ID
             analysis_result: The result of the chart analysis
@@ -55,55 +61,70 @@ class PositionCreationView(ui.View):
         }
 
         # Add buttons based on extracted data
-        if not self.position_data["symbol"] or self.position_data["symbol"] == "UNKNOWN":
+        if (
+            not self.position_data["symbol"]
+            or self.position_data["symbol"] == "UNKNOWN"
+        ):
             # If symbol is unknown, add a button to set it
-            self.add_item(ui.Button(
-                label="Set Symbol",
-                custom_id=f"set_symbol_{self.unique_id}",
-                style=ButtonStyle.primary
-            ))
+            self.add_item(
+                ui.Button(
+                    label="Set Symbol",
+                    custom_id=f"set_symbol_{self.unique_id}",
+                    style=ButtonStyle.primary,
+                )
+            )
 
         if not self.position_data["entry"]:
             # If entry is unknown, add a button to set it
-            self.add_item(ui.Button(
-                label="Set Entry Price",
-                custom_id=f"set_entry_{self.unique_id}",
-                style=ButtonStyle.primary
-            ))
+            self.add_item(
+                ui.Button(
+                    label="Set Entry Price",
+                    custom_id=f"set_entry_{self.unique_id}",
+                    style=ButtonStyle.primary,
+                )
+            )
 
         # Add type selection if it wasn't detected
-        if not self.position_data["position_type"] or self.position_data["position_type"] not in ["long", "short"]:
+        if not self.position_data["position_type"] or self.position_data[
+            "position_type"
+        ] not in ["long", "short"]:
             self.add_item(PositionTypeSelect(self.unique_id))
 
         # Add confirmation button if we have the minimum required data
         if self.has_minimum_data():
-            self.add_item(ui.Button(
-                label="Create Position",
-                custom_id=f"create_position_{self.unique_id}",
-                style=ButtonStyle.success
-            ))
+            self.add_item(
+                ui.Button(
+                    label="Create Position",
+                    custom_id=f"create_position_{self.unique_id}",
+                    style=ButtonStyle.success,
+                )
+            )
 
         # Always add cancel button
-        self.add_item(ui.Button(
-            label="Cancel",
-            custom_id=f"cancel_{self.unique_id}",
-            style=ButtonStyle.danger
-        ))
+        self.add_item(
+            ui.Button(
+                label="Cancel",
+                custom_id=f"cancel_{self.unique_id}",
+                style=ButtonStyle.danger,
+            )
+        )
 
     def _extract_data_from_analysis(self, analysis_result: str) -> Dict[str, Any]:
         """
         Extract position data from the analysis result.
-        
+
         Args:
             analysis_result: The result of the chart analysis
-            
+
         Returns:
             Dict with extracted data
         """
         data = {}
 
         # Try to extract symbol
-        symbol_match = re.search(r"Symbol:?\s+([A-Z0-9]+)", analysis_result, re.IGNORECASE)
+        symbol_match = re.search(
+            r"Symbol:?\s+([A-Z0-9]+)", analysis_result, re.IGNORECASE
+        )
         if symbol_match:
             data["symbol"] = symbol_match.group(1).upper()
         elif "BTC" in analysis_result or "Bitcoin" in analysis_result:
@@ -142,13 +163,29 @@ class PositionCreationView(ui.View):
             data["position_type"] = "short"
         else:
             # If we have entry and take profit/stop loss, try to determine direction
-            if "entry" in data and "take_profit" in data and data["take_profit"] > data["entry"]:
+            if (
+                "entry" in data
+                and "take_profit" in data
+                and data["take_profit"] > data["entry"]
+            ):
                 data["position_type"] = "long"
-            elif "entry" in data and "take_profit" in data and data["take_profit"] < data["entry"]:
+            elif (
+                "entry" in data
+                and "take_profit" in data
+                and data["take_profit"] < data["entry"]
+            ):
                 data["position_type"] = "short"
-            elif "entry" in data and "stop_loss" in data and data["stop_loss"] < data["entry"]:
+            elif (
+                "entry" in data
+                and "stop_loss" in data
+                and data["stop_loss"] < data["entry"]
+            ):
                 data["position_type"] = "long"
-            elif "entry" in data and "stop_loss" in data and data["stop_loss"] > data["entry"]:
+            elif (
+                "entry" in data
+                and "stop_loss" in data
+                and data["stop_loss"] > data["entry"]
+            ):
                 data["position_type"] = "short"
             else:
                 # Default to long if we can't determine
@@ -159,31 +196,30 @@ class PositionCreationView(ui.View):
     def has_minimum_data(self) -> bool:
         """
         Check if we have the minimum required data to create a position.
-        
+
         Returns:
             True if we have the minimum required data, False otherwise
         """
         return (
-                self.position_data.get("symbol") and
-                self.position_data.get("symbol") != "UNKNOWN" and
-                self.position_data.get("entry") is not None and
-                self.position_data.get("position_type") in ["long", "short"]
+            self.position_data.get("symbol")
+            and self.position_data.get("symbol") != "UNKNOWN"
+            and self.position_data.get("entry") is not None
+            and self.position_data.get("position_type") in ["long", "short"]
         )
 
     async def interaction_check(self, interaction: Interaction) -> bool:
         """
         Check if the user interacting with this view is the user who created it.
-        
+
         Args:
             interaction: The interaction
-            
+
         Returns:
             True if the user is allowed to interact with this view, False otherwise
         """
         if str(interaction.user.id) != self.user_id:
             await interaction.response.send_message(
-                "This isn't your position creation dialog!",
-                ephemeral=True
+                "This isn't your position creation dialog!", ephemeral=True
             )
             return False
         return True
@@ -202,9 +238,7 @@ class PositionCreationView(ui.View):
         try:
             # Create the position
             position = await create_position_from_chart_data(
-                self.user_id,
-                PlatformType.DISCORD,
-                self.position_data
+                self.user_id, PlatformType.DISCORD, self.position_data
             )
 
             if position:
@@ -214,7 +248,7 @@ class PositionCreationView(ui.View):
                 # Send confirmation message
                 await interaction.followup.send(
                     f"✅ Position created successfully!\n\n{position_details}",
-                    ephemeral=True
+                    ephemeral=True,
                 )
 
                 # Call completion callback with position ID
@@ -223,8 +257,7 @@ class PositionCreationView(ui.View):
             else:
                 # Send error message
                 await interaction.followup.send(
-                    "❌ Failed to create position. Please try again.",
-                    ephemeral=True
+                    "❌ Failed to create position. Please try again.", ephemeral=True
                 )
 
                 # Call completion callback with None to indicate failure
@@ -234,7 +267,7 @@ class PositionCreationView(ui.View):
             logger.error(f"Error creating position: {e}")
             await interaction.followup.send(
                 "❌ An error occurred while creating the position. Please try again.",
-                ephemeral=True
+                ephemeral=True,
             )
 
             # Call completion callback with None to indicate error
@@ -254,10 +287,7 @@ class PositionCreationView(ui.View):
         await interaction.response.defer(ephemeral=True)
 
         # Send cancellation message
-        await interaction.followup.send(
-            "Position creation cancelled.",
-            ephemeral=True
-        )
+        await interaction.followup.send("Position creation cancelled.", ephemeral=True)
 
         # Call completion callback with None to indicate cancellation
         if self.on_complete:
@@ -291,13 +321,23 @@ class PositionTypeSelect(ui.Select):
     def __init__(self, unique_id: str):
         """Initialize the select menu."""
         options = [
-            SelectOption(label="Long", value="long", description="Entry → Profit: Price goes up", emoji="🟢"),
-            SelectOption(label="Short", value="short", description="Entry → Profit: Price goes down", emoji="🔴")
+            SelectOption(
+                label="Long",
+                value="long",
+                description="Entry → Profit: Price goes up",
+                emoji="🟢",
+            ),
+            SelectOption(
+                label="Short",
+                value="short",
+                description="Entry → Profit: Price goes down",
+                emoji="🔴",
+            ),
         ]
         super().__init__(
             placeholder="Select position type (Long/Short)",
             options=options,
-            custom_id=f"position_type_select_{unique_id}"
+            custom_id=f"position_type_select_{unique_id}",
         )
 
     async def callback(self, interaction: Interaction):
@@ -312,19 +352,22 @@ class PositionTypeSelect(ui.Select):
 
         # Send confirmation message
         await interaction.followup.send(
-            f"Position type set to: {self.values[0].upper()}",
-            ephemeral=True
+            f"Position type set to: {self.values[0].upper()}", ephemeral=True
         )
 
         # Add create button if we have the minimum required data
         if self.has_minimum_data():
-            has_create_button = any(item.label == "Create Position" for item in view.children)
+            has_create_button = any(
+                item.label == "Create Position" for item in view.children
+            )
             if not has_create_button:
-                view.add_item(ui.Button(
-                    label="Create Position",
-                    custom_id=f"create_position_{view.unique_id}",
-                    style=ButtonStyle.success
-                ))
+                view.add_item(
+                    ui.Button(
+                        label="Create Position",
+                        custom_id=f"create_position_{view.unique_id}",
+                        style=ButtonStyle.success,
+                    )
+                )
 
         # Update the view
         await interaction.edit_original_response(view=view)
@@ -338,7 +381,7 @@ class SymbolModal(ui.Modal, title="Set Trading Symbol"):
         placeholder="Enter the trading pair symbol",
         required=True,
         min_length=1,
-        max_length=20
+        max_length=20,
     )
 
     def __init__(self, parent_view: PositionCreationView):
@@ -355,8 +398,7 @@ class SymbolModal(ui.Modal, title="Set Trading Symbol"):
 
         # Send confirmation message
         await interaction.followup.send(
-            f"Symbol set to: {self.symbol.value.upper()}",
-            ephemeral=True
+            f"Symbol set to: {self.symbol.value.upper()}", ephemeral=True
         )
 
         # Remove the set symbol button
@@ -371,13 +413,17 @@ class SymbolModal(ui.Modal, title="Set Trading Symbol"):
         # Add create button if we have the minimum required data
         if self.parent_view.has_minimum_data():
             # Check if we already have a create button
-            has_create_button = any(item.label == "Create Position" for item in self.parent_view.children)
+            has_create_button = any(
+                item.label == "Create Position" for item in self.parent_view.children
+            )
             if not has_create_button:
-                self.parent_view.add_item(ui.Button(
-                    label="Create Position",
-                    custom_id=f"create_position_{self.parent_view.unique_id}",
-                    style=ButtonStyle.success
-                ))
+                self.parent_view.add_item(
+                    ui.Button(
+                        label="Create Position",
+                        custom_id=f"create_position_{self.parent_view.unique_id}",
+                        style=ButtonStyle.success,
+                    )
+                )
 
         # Update the view
         await interaction.edit_original_response(view=self.parent_view)
@@ -391,7 +437,7 @@ class EntryPriceModal(ui.Modal, title="Set Entry Price"):
         placeholder="Enter the entry price (numeric value)",
         required=True,
         min_length=1,
-        max_length=20
+        max_length=20,
     )
 
     def __init__(self, parent_view: PositionCreationView):
@@ -412,8 +458,7 @@ class EntryPriceModal(ui.Modal, title="Set Entry Price"):
 
             # Send confirmation message
             await interaction.followup.send(
-                f"Entry price set to: {entry_price}",
-                ephemeral=True
+                f"Entry price set to: {entry_price}", ephemeral=True
             )
 
             # Remove the set entry button
@@ -428,19 +473,23 @@ class EntryPriceModal(ui.Modal, title="Set Entry Price"):
             # Add create button if we have the minimum required data
             if self.parent_view.has_minimum_data():
                 # Check if we already have a create button
-                has_create_button = any(item.custom_id == "create_position" for item in self.parent_view.children)
+                has_create_button = any(
+                    item.custom_id == "create_position"
+                    for item in self.parent_view.children
+                )
                 if not has_create_button:
-                    self.parent_view.add_item(ui.Button(
-                        label="Create Position",
-                        custom_id="create_position",
-                        style=ButtonStyle.success
-                    ))
+                    self.parent_view.add_item(
+                        ui.Button(
+                            label="Create Position",
+                            custom_id="create_position",
+                            style=ButtonStyle.success,
+                        )
+                    )
 
             # Update the view
             await interaction.edit_original_response(view=self.parent_view)
         except ValueError:
             # Send error message if entry price is not a valid number
             await interaction.followup.send(
-                "Entry price must be a valid number. Please try again.",
-                ephemeral=True
+                "Entry price must be a valid number. Please try again.", ephemeral=True
             )
