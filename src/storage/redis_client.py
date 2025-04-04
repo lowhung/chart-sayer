@@ -28,6 +28,8 @@ class RedisClient:
     """Redis client for managing positions and other data."""
 
     _instance = None
+    _initialized = False
+    _pool: Optional[ConnectionPool] = None
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
@@ -42,7 +44,7 @@ class RedisClient:
         # Get Redis URL from environment variable or use default
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
 
-        self.pool = ConnectionPool.from_url(redis_url)
+        self.pool: ConnectionPool = ConnectionPool.from_url(redis_url)
         self._initialized = True
 
         # Log a sanitized version of the URL (without credentials if any)

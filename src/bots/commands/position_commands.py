@@ -1,6 +1,9 @@
-import logging
-from typing import Optional
+"""Position management commands for Discord bot."""
 
+import logging
+from typing import Dict, Optional
+
+import discord
 from discord import app_commands, Interaction, Embed, Color
 from discord.ext import commands
 
@@ -13,7 +16,7 @@ from src.bots.utils.position_utils import (
     stop_user_position,
     update_user_position,
 )
-from src.positions.models import PlatformType
+from src.positions.models import PlatformType, PositionType
 
 logger = logging.getLogger(__name__)
 

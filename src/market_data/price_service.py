@@ -5,25 +5,21 @@ Market data service for fetching real-time price information.
 import logging
 import os
 import time
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Any
 
 import aiohttp
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables
 load_dotenv()
 
-# CoinMarketCap API Key
 CMC_API_KEY = os.getenv("CMC_API_KEY", "")
 
-# Default cache TTL in seconds (5 minutes)
 DEFAULT_CACHE_TTL = 300
 
-# Price cache
-_price_cache = {}
-_last_update_time = {}
+_price_cache: Dict[str, Any] = {}
+_last_update_time: Dict[str, Any] = {}
 
 
 async def get_crypto_price(
