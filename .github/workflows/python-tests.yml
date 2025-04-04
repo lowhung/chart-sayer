@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12"]
+        python-version: [ "3.13" ]
 
     services:
       redis:
@@ -25,50 +25,50 @@ jobs:
           --health-retries 5
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'pip'
-    
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        poetry --version
-    
-    - name: Configure Poetry
-      run: |
-        poetry config virtualenvs.in-project true
-    
-    - name: Install dependencies
-      run: |
-        poetry lock
-        poetry install --with dev
-    
-    - name: Lint with pylint
-      run: |
-        poetry run pylint src/ tests/ --disable=C0111
-    
-    - name: Check formatting with black
-      run: |
-        poetry run black --check src/ tests/
-    
-    - name: Type check with mypy
-      run: |
-        poetry run mypy src/
-    
-    - name: Run unit tests
-      run: |
-        poetry run pytest tests/unit/ --cov=src --cov-report=xml
-    
-    - name: Run integration tests
-      run: |
-        poetry run pytest tests/integration/
-    
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        fail_ci_if_error: false
+      - uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry --version
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: |
+          poetry lock
+          poetry install --with dev
+
+      - name: Lint with pylint
+        run: |
+          poetry run pylint src/ tests/ --disable=C0111
+
+      - name: Check formatting with black
+        run: |
+          poetry run black --check src/ tests/
+
+      - name: Type check with mypy
+        run: |
+          poetry run mypy src/
+
+      - name: Run unit tests
+        run: |
+          poetry run pytest tests/unit/ --cov=src --cov-report=xml
+
+      - name: Run integration tests
+        run: |
+          poetry run pytest tests/integration/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
