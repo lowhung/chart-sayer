@@ -19,15 +19,15 @@ shutdown_event = asyncio.Event()
 running_tasks = set()
 
 load_dotenv()
-discord_token = os.getenv('DISCORD_TOKEN')
-application_id = os.getenv('DISCORD_CLIENT_ID')
-test_guild_id = os.getenv('DISCORD_TEST_GUILD_ID')
+discord_token = os.getenv("DISCORD_TOKEN")
+application_id = os.getenv("DISCORD_CLIENT_ID")
+test_guild_id = os.getenv("DISCORD_TEST_GUILD_ID")
 
 guild_ids = [int(test_guild_id)] if test_guild_id else None
 
 intents = Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='/', intents=intents)
+bot = commands.Bot(command_prefix="/", intents=intents)
 
 
 def create_tracked_task(coro):
@@ -43,14 +43,10 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         self.bot = core_bot
 
         self.chart_group = app_commands.Group(
-            name="chart",
-            description="Chart analysis commands",
-            guild_ids=guild_ids
+            name="chart", description="Chart analysis commands", guild_ids=guild_ids
         )
         self.admin_group = app_commands.Group(
-            name="admin",
-            description="Admin commands",
-            guild_ids=guild_ids
+            name="admin", description="Admin commands", guild_ids=guild_ids
         )
 
         self.bot.tree.add_command(self.chart_group)
@@ -63,47 +59,49 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 
         @self.chart_group.command(name="start", description="Start the Chart Sayer bot")
         async def start(interaction: Interaction):
-            await interaction.response.send_message('Hello! I am your Chart Sayer bot.')
+            await interaction.response.send_message("Hello! I am your Chart Sayer bot.")
 
         @self.chart_group.command(name="help", description="Get help with chart analysis")
         async def help_command(interaction: Interaction):
             embed = Embed(
                 title="Chart Sayer - Trading Chart Analysis Bot",
                 description="I can analyze trading charts to identify key price levels and trading opportunities.",
-                color=Color.blue()
+                color=Color.blue(),
             )
 
             embed.add_field(
                 name="📈 Chart Analysis",
                 value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="⚙️ Custom Settings",
                 value="Use `/chart setup` to customize how I analyze your charts, including colors for entry/exit points and which indicators to prioritize.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="📊 Supported Chart Types",
                 value="I can analyze most standard trading charts including candlestick, line, and bar charts from any platform.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="🔍 Example Usage",
                 value="1. Take a screenshot of your chart\n2. Use `/chart analyze` and upload the image\n3. Receive entry, stop loss, and take profit levels",
-                inline=False
+                inline=False,
             )
 
-            embed.set_footer(text="For more detailed help, visit our documentation or contact the bot administrator.")
+            embed.set_footer(
+                text="For more detailed help, visit our documentation or contact the bot administrator."
+            )
 
             await interaction.response.send_message(embed=embed)
 
         @self.chart_group.command(name="analyze", description="Analyze a chart image")
         async def analyze(interaction: Interaction, file: Attachment):
-            if not file.content_type or not file.content_type.startswith('image/'):
+            if not file.content_type or not file.content_type.startswith("image/"):
                 await interaction.response.send_message(
                     "Please upload an image file. This doesn't appear to be an image."
                 )
@@ -119,7 +117,9 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 config_path = "src/config/chart_config.json"
 
                 if user_id in self.user_configs:
-                    result = process_chart_with_gpt4o(image_path, config_path, user_config=self.user_configs[user_id])
+                    result = process_chart_with_gpt4o(
+                        image_path, config_path, user_config=self.user_configs[user_id]
+                    )
                 else:
                     result = process_chart_with_gpt4o(image_path, config_path)
 
@@ -135,7 +135,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         async def setup(interaction: Interaction):
             """Start the setup process for chart analysis configuration"""
             config_path = "src/config/chart_config.json"
-            with open(config_path, 'r') as file:
+            with open(config_path, "r") as file:
                 default_config = json.load(file)
 
             user_id = str(interaction.user.id)
@@ -146,7 +146,7 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
             await interaction.response.send_message(
                 "Welcome to Chart Sayer Setup! Select an option to configure:",
                 view=view,
-                ephemeral=True
+                ephemeral=True,
             )
 
         @self.admin_group.command(name="resync", description="Resync application commands")
@@ -159,61 +159,68 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                     for guild_id in guild_ids:
                         guild = Object(id=guild_id)
                         await self.bot.tree.sync(guild=guild)
-                        await interaction.edit_original_response(content=f"Command sync complete for guild {guild_id}")
+                        await interaction.edit_original_response(
+                            content=f"Command sync complete for guild {guild_id}"
+                        )
                 else:
                     await self.bot.tree.sync()
                     await interaction.edit_original_response(content="Global command sync complete")
 
-                await interaction.edit_original_response(content="✅ All commands re-synced successfully!")
+                await interaction.edit_original_response(
+                    content="✅ All commands re-synced successfully!"
+                )
             except Exception as e:
                 logger.error(f"Error syncing commands: {e}")
                 await interaction.edit_original_response(
-                    content=f"❌ There was an error during re-sync. Please contact support.")
+                    content=f"❌ There was an error during re-sync. Please contact support."
+                )
 
-    @commands.command(name='start')
+    @commands.command(name="start")
     async def prefix_start(self, ctx):
-        await ctx.send('Hello! I am your Chart Sayer bot.')
+        await ctx.send("Hello! I am your Chart Sayer bot.")
 
-    @commands.command(name='chart_help')
+    @commands.command(name="chart_help")
     async def prefix_chart_help(self, ctx):
         embed = Embed(
             title="Chart Sayer - Trading Chart Analysis Bot",
             description="I can analyze trading charts to identify key price levels and trading opportunities.",
-            color=Color.blue()
+            color=Color.blue(),
         )
 
         embed.add_field(
             name="📈 Chart Analysis",
             value="Use `/chart analyze` and attach a chart image to get entry, stop loss, and take profit levels automatically identified.",
-            inline=False
+            inline=False,
         )
 
         embed.add_field(
             name="⚙️ Custom Settings",
             value="Use `/chart setup` to customize how I analyze your charts, including colors for entry/exit points and which indicators to prioritize.",
-            inline=False
+            inline=False,
         )
 
         embed.add_field(
             name="📊 Supported Chart Types",
             value="I can analyze most standard trading charts including candlestick, line, and bar charts from any platform.",
-            inline=False
+            inline=False,
         )
 
         embed.add_field(
             name="🔍 Example Usage",
             value="1. Take a screenshot of your chart\n2. Use `/chart analyze` and upload the image\n3. Receive entry, stop loss, and take profit levels",
-            inline=False
+            inline=False,
         )
 
-        embed.set_footer(text="For more detailed help, visit our documentation or contact the bot administrator.")
+        embed.set_footer(
+            text="For more detailed help, visit our documentation or contact the bot administrator."
+        )
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='analyze')
+    @commands.command(name="analyze")
     async def prefix_analyze(self, ctx):
         if not ctx.message.attachments:
-            await ctx.send('Please attach an image to analyze.')
+            await ctx.send("Please attach an image to analyze.")
             return
 
         attachment = ctx.message.attachments[0]
@@ -226,14 +233,16 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 
         if user_id in self.user_configs:
 
-            result = process_chart_with_gpt4o(image_path, config_path, user_config=self.user_configs[user_id])
+            result = process_chart_with_gpt4o(
+                image_path, config_path, user_config=self.user_configs[user_id]
+            )
         else:
 
             result = process_chart_with_gpt4o(image_path, config_path)
 
         await ctx.send(f"Analysis Result: {result}")
 
-    @commands.command(name='resync')
+    @commands.command(name="resync")
     @commands.is_owner()
     async def prefix_resync(self, ctx):
         """Resynchronizes application commands with Discord."""
@@ -258,8 +267,8 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
 @bot.event
 async def on_ready():
     """Called when the bot successfully connects to Discord"""
-    logger.info(f'Logged in as {bot.user.name} ({bot.user.id})')
-    logger.info('------')
+    logger.info(f"Logged in as {bot.user.name} ({bot.user.id})")
+    logger.info("------")
     bot_ready.set()
 
 
@@ -272,6 +281,7 @@ async def setup_bot():
     # Load position commands
     try:
         from src.bots.commands.position_commands import PositionCommands
+
         await bot.add_cog(PositionCommands(bot))
         logger.info("Position commands loaded successfully")
     except Exception as e:
@@ -372,7 +382,7 @@ async def setup_discord_webhook(public_key):
     if not bot:
         intents = Intents.default()
         intents.message_content = True
-        bot = commands.Bot(command_prefix='/', intents=intents)
+        bot = commands.Bot(command_prefix="/", intents=intents)
 
         await setup_bot()
 
@@ -383,8 +393,8 @@ async def setup_discord_webhook(public_key):
 
 async def verify_discord_signature(request: Request, public_key: str):
     """Verify that the request came from Discord."""
-    signature = request.headers.get('X-Signature-Ed25519')
-    timestamp = request.headers.get('X-Signature-Timestamp')
+    signature = request.headers.get("X-Signature-Ed25519")
+    timestamp = request.headers.get("X-Signature-Timestamp")
 
     if not signature or not timestamp:
         return False
@@ -399,6 +409,7 @@ async def verify_discord_signature(request: Request, public_key: str):
         public_key_bytes = bytes.fromhex(public_key)
 
         import nacl.signing
+
         verify_key = nacl.signing.VerifyKey(public_key_bytes)
         verify_key.verify(message, signature_bytes)
         return True
@@ -410,20 +421,18 @@ async def verify_discord_signature(request: Request, public_key: str):
 async def process_discord_interaction(interaction_data):
     """Process a Discord interaction from a webhook."""
     # Handle PING interactions (required for webhook verification)
-    if interaction_data['type'] == 1:  # PING
+    if interaction_data["type"] == 1:  # PING
         return {"type": 1}  # PONG
 
     # Handle application commands (slash commands)
-    elif interaction_data['type'] == 2:  # APPLICATION_COMMAND
-        command_name = interaction_data['data']['name']
+    elif interaction_data["type"] == 2:  # APPLICATION_COMMAND
+        command_name = interaction_data["data"]["name"]
         logger.info(f"Received command: {command_name}")
 
         # Defer the response to give us time to process
         response = {
             "type": 5,  # DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE
-            "data": {
-                "flags": 64  # EPHEMERAL (only visible to the user)
-            }
+            "data": {"flags": 64},  # EPHEMERAL (only visible to the user)
         }
 
         asyncio.create_task(handle_command(interaction_data))
@@ -436,17 +445,17 @@ async def process_discord_interaction(interaction_data):
             "type": 4,  # CHANNEL_MESSAGE_WITH_SOURCE
             "data": {
                 "content": "This interaction type is not supported yet.",
-                "flags": 64  # EPHEMERAL
-            }
+                "flags": 64,  # EPHEMERAL
+            },
         }
 
 
 async def handle_command(interaction_data):
     """Handle a Discord command in a background task."""
     try:
-        command_name = interaction_data['data']['name']
-        interaction_id = interaction_data['id']
-        interaction_token = interaction_data['token']
+        command_name = interaction_data["data"]["name"]
+        interaction_id = interaction_data["id"]
+        interaction_token = interaction_data["token"]
 
         if command_name == "start":
             content = "Hello! I am your Chart Sayer bot."
@@ -460,12 +469,8 @@ async def handle_command(interaction_data):
         # Send a followup message using Discord's REST API
         webhook_url = f"https://discord.com/api/v10/webhooks/{application_id}/{interaction_token}/messages/@original"
 
-        headers = {
-            "Content-Type": "application/json"
-        }
-        payload = {
-            "content": content
-        }
+        headers = {"Content-Type": "application/json"}
+        payload = {"content": content}
 
         async with aiohttp.ClientSession() as session:
             async with session.patch(webhook_url, json=payload, headers=headers) as response:
@@ -478,6 +483,7 @@ async def handle_command(interaction_data):
 
 
 if __name__ == "__main__":
+
     async def main():
         await setup_bot()
         bot_task, sync_task = await start_bot()
@@ -488,6 +494,5 @@ if __name__ == "__main__":
             logger.info("Bot interrupted, shutting down...")
         finally:
             await shutdown_bot()
-
 
     asyncio.run(main())

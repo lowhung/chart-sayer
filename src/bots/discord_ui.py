@@ -13,15 +13,30 @@ class SetupMenuView(ui.View):
     @ui.select(
         placeholder="Select a setting to configure",
         options=[
-            SelectOption(label="Entry Color", description="Set color for entry points", value="entry_color"),
-            SelectOption(label="Stop Loss Color", description="Set color for stop loss points",
-                         value="stop_loss_color"),
-            SelectOption(label="Take Profit Color", description="Set color for take profit points",
-                         value="take_profit_color"),
-            SelectOption(label="Indicators", description="Choose technical indicators to use", value="indicators"),
-            SelectOption(label="Output Format", description="Customize the output message format",
-                         value="output_format"),
-        ]
+            SelectOption(
+                label="Entry Color", description="Set color for entry points", value="entry_color"
+            ),
+            SelectOption(
+                label="Stop Loss Color",
+                description="Set color for stop loss points",
+                value="stop_loss_color",
+            ),
+            SelectOption(
+                label="Take Profit Color",
+                description="Set color for take profit points",
+                value="take_profit_color",
+            ),
+            SelectOption(
+                label="Indicators",
+                description="Choose technical indicators to use",
+                value="indicators",
+            ),
+            SelectOption(
+                label="Output Format",
+                description="Customize the output message format",
+                value="output_format",
+            ),
+        ],
     )
     async def select_setting(self, interaction: Interaction, select: ui.Select):
         setting = select.values[0]
@@ -29,32 +44,27 @@ class SetupMenuView(ui.View):
         if setting == "entry_color":
             view = ColorSelectView(self.cog, self.user_id, "entry_color", "Entry Point")
             await interaction.response.edit_message(
-                content="Select the color to use for entry points:",
-                view=view
+                content="Select the color to use for entry points:", view=view
             )
         elif setting == "stop_loss_color":
             view = ColorSelectView(self.cog, self.user_id, "stop_loss_color", "Stop Loss")
             await interaction.response.edit_message(
-                content="Select the color to use for stop loss points:",
-                view=view
+                content="Select the color to use for stop loss points:", view=view
             )
         elif setting == "take_profit_color":
             view = ColorSelectView(self.cog, self.user_id, "take_profit_color", "Take Profit")
             await interaction.response.edit_message(
-                content="Select the color to use for take profit points:",
-                view=view
+                content="Select the color to use for take profit points:", view=view
             )
         elif setting == "indicators":
             view = IndicatorsView(self.cog, self.user_id)
             await interaction.response.edit_message(
-                content="Select the technical indicators to use:",
-                view=view
+                content="Select the technical indicators to use:", view=view
             )
         elif setting == "output_format":
             view = OutputFormatView(self.cog, self.user_id)
             await interaction.response.edit_message(
-                content="Customize the output format:",
-                view=view
+                content="Customize the output format:", view=view
             )
 
     @ui.button(label="View Current Settings", style=ButtonStyle.secondary)
@@ -75,15 +85,14 @@ class SetupMenuView(ui.View):
     async def reset_settings(self, interaction: Interaction, button: ui.Button):
 
         config_path = "src/config/chart_config.json"
-        with open(config_path, 'r') as file:
+        with open(config_path, "r") as file:
             default_config = json.load(file)
 
         self.cog.user_configs[self.user_id] = default_config.copy()
         self.config = default_config.copy()
 
         await interaction.response.edit_message(
-            content="Settings have been reset to default values.",
-            view=self
+            content="Settings have been reset to default values.", view=self
         )
 
 
@@ -104,21 +113,21 @@ class ColorSelectView(ui.View):
             SelectOption(label="Yellow", value="yellow"),
             SelectOption(label="Purple", value="purple"),
             SelectOption(label="Orange", value="orange"),
-        ]
+        ],
     )
     async def select_color(self, interaction: Interaction, select: ui.Select):
         self.cog.user_configs[self.user_id][self.setting_key] = select.values[0]
 
         await interaction.response.edit_message(
             content=f"{self.setting_name} color set to {select.values[0]}.",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
     @ui.button(label="Back", style=ButtonStyle.secondary)
     async def back(self, interaction: Interaction, button: ui.Button):
         await interaction.response.edit_message(
             content="Welcome to Chart Sayer Setup! Select an option to configure:",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
 
@@ -139,15 +148,15 @@ class IndicatorsView(ui.View):
             SelectOption(label="Bollinger Bands", value="bollinger_bands"),
         ],
         min_values=0,
-        max_values=5
+        max_values=5,
     )
     async def select_indicators(self, interaction: Interaction, select: ui.Select):
         self.selected_indicators = select.values
 
         await interaction.response.edit_message(
             content=f"Selected indicators: {', '.join(select.values) if select.values else 'None'}\n"
-                    f"Click Save to apply these changes.",
-            view=self
+            f"Click Save to apply these changes.",
+            view=self,
         )
 
     @ui.button(label="Save", style=ButtonStyle.primary)
@@ -156,14 +165,14 @@ class IndicatorsView(ui.View):
 
         await interaction.response.edit_message(
             content=f"Indicators updated to: {', '.join(self.selected_indicators) if self.selected_indicators else 'None'}",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
     @ui.button(label="Back", style=ButtonStyle.secondary)
     async def back(self, interaction: Interaction, button: ui.Button):
         await interaction.response.edit_message(
             content="Welcome to Chart Sayer Setup! Select an option to configure:",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
 
@@ -179,26 +188,26 @@ class OutputFormatView(ui.View):
             SelectOption(
                 label="Standard",
                 description="Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}",
-                value="Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}"
+                value="Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}",
             ),
             SelectOption(
                 label="Detailed",
                 description="Entry Point: {entry} | SL: {stop_loss} | TP: {take_profit}",
-                value="Entry Point: {entry} | SL: {stop_loss} | TP: {take_profit}"
+                value="Entry Point: {entry} | SL: {stop_loss} | TP: {take_profit}",
             ),
             SelectOption(
                 label="Minimal",
                 description="E:{entry} SL:{stop_loss} TP:{take_profit}",
-                value="E:{entry} SL:{stop_loss} TP:{take_profit}"
+                value="E:{entry} SL:{stop_loss} TP:{take_profit}",
             ),
-        ]
+        ],
     )
     async def select_format(self, interaction: Interaction, select: ui.Select):
         self.cog.user_configs[self.user_id]["output_format"] = select.values[0]
 
         await interaction.response.edit_message(
             content=f"Output format updated to: `{select.values[0]}`",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
     @ui.button(label="Custom Format", style=ButtonStyle.primary)
@@ -209,7 +218,7 @@ class OutputFormatView(ui.View):
     async def back(self, interaction: Interaction, button: ui.Button):
         await interaction.response.edit_message(
             content="Welcome to Chart Sayer Setup! Select an option to configure:",
-            view=SetupMenuView(self.cog, self.user_id)
+            view=SetupMenuView(self.cog, self.user_id),
         )
 
 
@@ -218,7 +227,7 @@ class CustomFormatModal(ui.Modal, title="Custom Output Format"):
         label="Format String",
         placeholder="Entry: {entry}, Stop Loss: {stop_loss}, Take Profit: {take_profit}",
         required=True,
-        style=TextStyle.paragraph
+        style=TextStyle.paragraph,
     )
 
     def __init__(self, cog, user_id):
@@ -240,10 +249,10 @@ class CustomFormatModal(ui.Modal, title="Custom Output Format"):
 
             await interaction.response.edit_message(
                 content=f"Output format updated to: `{format_str}`",
-                view=SetupMenuView(self.cog, self.user_id)
+                view=SetupMenuView(self.cog, self.user_id),
             )
         else:
             await interaction.response.edit_message(
                 content="Invalid format string. Must contain {entry}, {stop_loss}, and {take_profit} placeholders.",
-                view=OutputFormatView(self.cog, self.user_id)
+                view=OutputFormatView(self.cog, self.user_id),
             )
