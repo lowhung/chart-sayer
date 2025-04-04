@@ -1,8 +1,6 @@
-"""Position management commands for Discord bot."""
 import logging
-from typing import Dict, Optional
+from typing import Optional
 
-import discord
 from discord import app_commands, Interaction, Embed, Color
 from discord.ext import commands
 
@@ -15,7 +13,7 @@ from src.bots.utils.position_utils import (
     stop_user_position,
     update_user_position,
 )
-from src.positions.models import PlatformType, PositionType
+from src.positions.models import PlatformType
 
 logger = logging.getLogger(__name__)
 
@@ -25,33 +23,33 @@ class PositionCommands(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        
+
         # Create the position command group
         self.position_group = app_commands.Group(
             name="position",
             description="Trading position management commands",
-            guild_ids=None  # This will use the same guild_ids as defined in bot setup
+            guild_ids=None,  # This will use the same guild_ids as defined in bot setup
         )
-        
+
         # Add the command group to the bot's command tree
         self.bot.tree.add_command(self.position_group)
-        
+
         # Setup all position commands
         self.setup_commands()
-        
+
         logger.info("Position commands group initialized")
-    
+
     def setup_commands(self):
         """Register all commands to the position command group."""
-        
+
         @self.position_group.command(name="list", description="List your active positions")
         async def positions(interaction: Interaction):
             """List the user's active positions."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             positions_text = await list_user_positions(user_id, PlatformType.DISCORD)
-            
+
             await interaction.followup.send(positions_text, ephemeral=True)
 
         @self.position_group.command(name="details", description="Get details of a position")
@@ -59,9 +57,9 @@ class PositionCommands(commands.Cog):
         async def position_details(interaction: Interaction, position_id: str):
             """Get details of a specific position."""
             await interaction.response.defer(ephemeral=True)
-            
+
             position_text = await get_position_details(position_id)
-            
+
             await interaction.followup.send(position_text, ephemeral=True)
 
         @self.position_group.command(name="close", description="Close a position")
@@ -70,9 +68,9 @@ class PositionCommands(commands.Cog):
             """Close a position."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             result = await close_user_position(position_id, user_id, PlatformType.DISCORD)
-            
+
             await interaction.followup.send(result, ephemeral=True)
 
         @self.position_group.command(name="update", description="Update a position")
@@ -94,7 +92,7 @@ class PositionCommands(commands.Cog):
             """Update a position."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             update_data = {}
             if entry_price is not None:
                 update_data["entry_price"] = entry_price
@@ -104,13 +102,15 @@ class PositionCommands(commands.Cog):
                 update_data["stop_loss"] = stop_loss
             if notes is not None:
                 update_data["notes"] = notes
-                
+
             if not update_data:
                 await interaction.followup.send("No updates provided.", ephemeral=True)
                 return
-                
-            result = await update_user_position(position_id, user_id, PlatformType.DISCORD, update_data)
-            
+
+            result = await update_user_position(
+                position_id, user_id, PlatformType.DISCORD, update_data
+            )
+
             await interaction.followup.send(result, ephemeral=True)
 
         @self.position_group.command(name="stop", description="Stop tracking a position")
@@ -119,9 +119,9 @@ class PositionCommands(commands.Cog):
             """Stop tracking a position (soft-delete)."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             result = await stop_user_position(position_id, user_id, PlatformType.DISCORD)
-            
+
             await interaction.followup.send(result, ephemeral=True)
 
         @self.position_group.command(name="summary", description="Get a summary of your positions")
@@ -129,9 +129,9 @@ class PositionCommands(commands.Cog):
             """Get a summary of the user's positions."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             summary_text = await get_user_positions_summary(user_id, PlatformType.DISCORD)
-            
+
             await interaction.followup.send(summary_text, ephemeral=True)
 
         @self.position_group.command(name="create", description="Create a new position")
@@ -161,7 +161,7 @@ class PositionCommands(commands.Cog):
             """Create a new position manually."""
             await interaction.response.defer(ephemeral=True)
             user_id = str(interaction.user.id)
-            
+
             chart_data = {
                 "symbol": symbol.upper(),
                 "entry": entry_price,
@@ -170,11 +170,11 @@ class PositionCommands(commands.Cog):
                 "position_type": position_type,
                 "notes": notes,
             }
-            
+
             position = await create_position_from_chart_data(
                 user_id, PlatformType.DISCORD, chart_data
             )
-            
+
             if position:
                 await interaction.followup.send(
                     f"Position created successfully!\n\n{await get_position_details(str(position.id))}",
@@ -185,59 +185,61 @@ class PositionCommands(commands.Cog):
                     "Failed to create position. Please try again later.",
                     ephemeral=True,
                 )
-        
+
         @self.position_group.command(name="help", description="Get help with position management")
         async def help_command(interaction: Interaction):
             """Display help information for position management."""
             embed = Embed(
                 title="Position Management - Trading Positions Tracker",
                 description="I can help you track and manage your trading positions.",
-                color=Color.green()
+                color=Color.green(),
             )
 
             embed.add_field(
                 name="📋 Position List",
                 value="Use `/position list` to see all your active positions.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="➕ Create Position",
                 value="Use `/position create` to manually create a new position.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="📊 Position Details",
                 value="Use `/position details <position_id>` to see details about a specific position.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="✏️ Update Position",
                 value="Use `/position update <position_id>` to modify an existing position.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="✅ Close Position",
                 value="Use `/position close <position_id>` to close a position.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="⏹️ Stop Tracking",
                 value="Use `/position stop <position_id>` to stop tracking a position.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="📑 Position Summary",
                 value="Use `/position summary` to get statistics about your positions.",
-                inline=False
+                inline=False,
             )
 
-            embed.set_footer(text="Positions are also created automatically when you share chart images.")
+            embed.set_footer(
+                text="Positions are also created automatically when you share chart images."
+            )
 
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
@@ -248,29 +250,28 @@ class PositionCommands(commands.Cog):
         # Skip messages from bots
         if message.author.bot:
             return
-            
+
         # Check if the message has attachments
         if not message.attachments:
             return
-            
+
         # Check if any attachment is an image
         image_attachments = [
-            a for a in message.attachments
-            if a.content_type and a.content_type.startswith("image/")
+            a for a in message.attachments if a.content_type and a.content_type.startswith("image/")
         ]
-        
+
         if not image_attachments:
             return
-            
+
         # Process the first image attachment
         image_attachment = image_attachments[0]
-        
+
         # Here you would call your chart analysis function to extract data
         # For demonstration purposes, we'll use a mock example
-        
+
         # This is where you would analyze the chart image
         # chart_data = await analyze_chart_image(image_attachment.url)
-        
+
         # For now, we'll use mock data
         chart_data = {
             "symbol": "BTCUSDT",
@@ -279,13 +280,11 @@ class PositionCommands(commands.Cog):
             "stop_loss": 48000,
             "position_type": "long",
         }
-        
+
         # Create a position from the chart data
         user_id = str(message.author.id)
-        position = await create_position_from_chart_data(
-            user_id, PlatformType.DISCORD, chart_data
-        )
-        
+        position = await create_position_from_chart_data(user_id, PlatformType.DISCORD, chart_data)
+
         if position:
             # Send a message to the channel
             await message.channel.send(
