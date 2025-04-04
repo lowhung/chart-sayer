@@ -3,9 +3,9 @@ from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Process a chart image using GPT-4o.')
-    parser.add_argument('image_path', type=str, help='Path to the chart image file')
-    parser.add_argument('config_path', type=str, help='Path to the configuration JSON file')
+    parser = argparse.ArgumentParser(description="Process a chart image using GPT-4o.")
+    parser.add_argument("image_path", type=str, help="Path to the chart image file")
+    parser.add_argument("config_path", type=str, help="Path to the configuration JSON file")
 
     args = parser.parse_args()
 

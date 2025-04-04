@@ -20,7 +20,8 @@ class TestUUIDEncoder:
     def test_encode_uuid(self, uuid_encoder):
         """Test encoding UUID to string."""
         from uuid import UUID
-        test_uuid = UUID('12345678-1234-5678-1234-567812345678')
+
+        test_uuid = UUID("12345678-1234-5678-1234-567812345678")
 
         # Test encoding with UUIDEncoder
         encoded = json.dumps(test_uuid, cls=UUIDEncoder)
@@ -31,8 +32,9 @@ class TestUUIDEncoder:
     def test_encode_dict_with_uuid(self, uuid_encoder):
         """Test encoding dictionary containing UUID."""
         from uuid import UUID
-        test_uuid = UUID('12345678-1234-5678-1234-567812345678')
-        test_dict = {'id': test_uuid, 'name': 'test'}
+
+        test_uuid = UUID("12345678-1234-5678-1234-567812345678")
+        test_dict = {"id": test_uuid, "name": "test"}
 
         # Test encoding with UUIDEncoder
         encoded = json.dumps(test_dict, cls=UUIDEncoder)
@@ -48,8 +50,8 @@ async def redis_client():
     # Use fakeredis for testing
     fake_redis = fakeredis.aioredis.FakeRedis()
 
-    with patch('redis.asyncio.Redis', return_value=fake_redis):
-        with patch('redis.asyncio.ConnectionPool.from_url', return_value=MagicMock()):
+    with patch("redis.asyncio.Redis", return_value=fake_redis):
+        with patch("redis.asyncio.ConnectionPool.from_url", return_value=MagicMock()):
             client = RedisClient("redis://fakehost:6379/0")
             # Override get_redis to return our fake redis
             client.get_redis = MagicMock(return_value=fake_redis)
@@ -137,7 +139,9 @@ class TestRedisClient:
         assert members == {"value1", "value2", "value3"}
 
         # Remove values
-        result = await redis_client.remove_from_set(set_key, "value1", "value99")  # value99 doesn't exist
+        result = await redis_client.remove_from_set(
+            set_key, "value1", "value99"
+        )  # value99 doesn't exist
         assert result == 1  # Only 1 value removed
 
         # Get final members
