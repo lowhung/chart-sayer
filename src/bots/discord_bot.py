@@ -4,12 +4,14 @@ import logging
 import os
 
 import aiohttp
-from discord import app_commands, Intents, Interaction, Attachment, Object, Embed, Color
+from discord import app_commands, Intents, Interaction, Attachment, Object, Embed, Color, ButtonStyle
+from discord import ui
 from discord.ext import commands
 from dotenv import load_dotenv
 from fastapi import Request
 
 from src.bots.discord_ui import SetupMenuView
+from src.bots.ui.position_creation_view import PositionCreationView
 from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 logger = logging.getLogger(__name__)
@@ -123,7 +125,63 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 else:
                     result = process_chart_with_gpt4o(image_path, config_path)
 
-                await interaction.followup.send(f"Analysis Result: {result}")
+                # Create an action row with a button to create a position
+                create_position_button = ui.Button(
+                    style=ButtonStyle.primary,
+                    label="Create Position",
+                    custom_id="create_position"
+                )
+
+                # Define what happens when the button is clicked
+                async def create_position_callback(interaction: Interaction):
+                    # Only the original user can click the button
+                    if str(interaction.user.id) != user_id:
+                        await interaction.response.send_message(
+                            "This isn't your chart analysis!",
+                            ephemeral=True
+                        )
+                        return
+
+                    # Start position creation conversation
+                    await interaction.response.defer(ephemeral=True)
+
+                    # Callback for when position creation is complete
+                    async def on_position_created(position_id: str = None):
+                        # Remove the view
+                        await interaction.edit_original_response(view=None)
+
+                        if position_id:
+                            # Announce the position creation to the channel
+                            channel = interaction.channel
+                            if channel:
+                                # Post position creation announcement
+                                await channel.send(
+                                    f"{interaction.user.mention} has created a new position based on chart analysis."
+                                    f" Use `/position {position_id}` to see details."
+                                )
+
+                    # Create the position creation view
+                    view = PositionCreationView(user_id, result, on_complete=on_position_created)
+
+                    # Send the view as a followup message
+                    await interaction.followup.send(
+                        "Let's create a position from this chart analysis. Review and confirm the details:",
+                        view=view,
+                        ephemeral=True
+                    )
+
+                # Set the callback
+                create_position_button.callback = create_position_callback
+
+                # Create a view with the button
+                view = ui.View()
+                view.add_item(create_position_button)
+
+                # Send result with the button
+                await interaction.followup.send(
+                    f"Analysis Result: {result}",
+                    view=view
+                )
 
             except Exception as e:
                 logger.error(f"Error processing image: {e}")
@@ -237,10 +295,62 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 image_path, config_path, user_config=self.user_configs[user_id]
             )
         else:
-
             result = process_chart_with_gpt4o(image_path, config_path)
 
-        await ctx.send(f"Analysis Result: {result}")
+        # Create an action row with a button to create a position
+        create_position_button = ui.Button(
+            style=ButtonStyle.primary,
+            label="Create Position",
+            custom_id="create_position"
+        )
+
+        # Define what happens when the button is clicked
+        async def create_position_callback(interaction: Interaction):
+            # Only the original user can click the button
+            if str(interaction.user.id) != user_id:
+                await interaction.response.send_message(
+                    "This isn't your chart analysis!",
+                    ephemeral=True
+                )
+                return
+
+            # Start position creation conversation
+            await interaction.response.defer(ephemeral=True)
+
+            # Callback for when position creation is complete
+            async def on_position_created(position_id: str = None):
+                # Remove the view
+                await interaction.edit_original_response(view=None)
+
+                if position_id:
+                    # Announce the position creation to the channel
+                    channel = ctx.channel
+                    if channel:
+                        # Post position creation announcement
+                        await channel.send(
+                            f"{ctx.author.mention} has created a new position based on chart analysis."
+                            f" Use `/position {position_id}` to see details."
+                        )
+
+            # Create the position creation view
+            view = PositionCreationView(user_id, result, on_complete=on_position_created)
+
+            # Send the view as a followup message
+            await interaction.followup.send(
+                "Let's create a position from this chart analysis. Review and confirm the details:",
+                view=view,
+                ephemeral=True
+            )
+
+        # Set the callback
+        create_position_button.callback = create_position_callback
+
+        # Create a view with the button
+        view = ui.View()
+        view.add_item(create_position_button)
+
+        # Send result with the button
+        await ctx.send(f"Analysis Result: {result}", view=view)
 
     @commands.command(name="resync")
     @commands.is_owner()
