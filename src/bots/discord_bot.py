@@ -290,6 +290,7 @@ async def setup_bot():
     # Load price commands
     try:
         from src.bots.commands.price_commands import PriceCommands
+
         await bot.add_cog(PriceCommands(bot))
         logger.info("Price commands loaded successfully")
     except Exception as e:

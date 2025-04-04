@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 load_dotenv()
 
 config_path = "src/config/chart_config.json"
-with open(config_path, 'r') as file:
+with open(config_path, "r") as file:
     config = json.load(file)
 
 shutdown_event = asyncio.Event()
@@ -87,18 +87,18 @@ redis_client = RedisClient()
 
 if "telegram" in config["clients"] and config.get("telegram", {}).get("webhook_mode", False):
     from src.routes.telegram_routes import router as telegram_router
+
     app.include_router(telegram_router)
 
 # Include positions router
 from src.routes.positions.router import router as positions_router
+
 app.include_router(positions_router)
 
 
 @app.get("/")
 async def read_root():
     return {"message": "Welcome to Chart Sayer API!"}
-
-
 
 
 if __name__ == "__main__":

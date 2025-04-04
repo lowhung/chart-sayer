@@ -14,8 +14,10 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
+
 class UUIDEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles UUID objects."""
+
     def default(self, obj):
         if isinstance(obj, UUID):
             return str(obj)
@@ -24,37 +26,37 @@ class UUIDEncoder(json.JSONEncoder):
 
 class RedisClient:
     """Redis client for managing positions and other data."""
-    
+
     _instance = None
-    
+
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(RedisClient, cls).__new__(cls)
             cls._instance._initialized = False
         return cls._instance
-    
+
     def __init__(self, redis_url: str = None):
         if self._initialized:
             return
-        
+
         # Get Redis URL from environment variable or use default
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379/0")
-        
+
         self.pool = ConnectionPool.from_url(redis_url)
         self._initialized = True
-        
+
         # Log a sanitized version of the URL (without credentials if any)
         sanitized_url = redis_url
         if "@" in redis_url:
             sanitized_url = redis_url.split("@")[-1]
             sanitized_url = f"redis://****:****@{sanitized_url}"
-        
+
         logger.info(f"Redis client initialized with URL: {sanitized_url}")
-    
+
     async def get_redis(self) -> redis.Redis:
         """Get a Redis connection from the pool."""
         return redis.Redis(connection_pool=self.pool)
-    
+
     async def set_json(self, key: str, data: Any, ttl: Optional[int] = None) -> bool:
         """Set a JSON value in Redis."""
         try:
@@ -66,7 +68,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error setting JSON in Redis: {e}")
             return False
-    
+
     async def get_json(self, key: str) -> Optional[Any]:
         """Get a JSON value from Redis."""
         try:
@@ -78,7 +80,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error getting JSON from Redis: {e}")
             return None
-    
+
     async def delete(self, key: str) -> bool:
         """Delete a key from Redis."""
         try:
@@ -88,7 +90,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error deleting key from Redis: {e}")
             return False
-    
+
     async def exists(self, key: str) -> bool:
         """Check if a key exists in Redis."""
         try:
@@ -97,7 +99,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error checking key existence in Redis: {e}")
             return False
-    
+
     async def keys(self, pattern: str) -> List[str]:
         """Get keys matching a pattern."""
         try:
@@ -107,7 +109,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error getting keys from Redis: {e}")
             return []
-    
+
     async def add_to_set(self, key: str, *values: str) -> int:
         """Add values to a Redis set."""
         try:
@@ -116,7 +118,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error adding to set in Redis: {e}")
             return 0
-    
+
     async def get_set_members(self, key: str) -> Set[str]:
         """Get all members of a Redis set."""
         try:
@@ -126,7 +128,7 @@ class RedisClient:
         except RedisError as e:
             logger.error(f"Error getting set members from Redis: {e}")
             return set()
-    
+
     async def remove_from_set(self, key: str, *values: str) -> int:
         """Remove values from a Redis set."""
         try:

@@ -1,4 +1,5 @@
 """Price commands for Discord bot."""
+
 import logging
 
 from discord import app_commands, Interaction, Embed, Color
@@ -19,7 +20,7 @@ class PriceCommands(commands.Cog):
         self.price_group = app_commands.Group(
             name="price",
             description="Cryptocurrency price commands",
-            guild_ids=None  # This will use the same guild_ids as defined in bot setup
+            guild_ids=None,  # This will use the same guild_ids as defined in bot setup
         )
 
         # Add the command group to the bot's command tree
@@ -36,7 +37,7 @@ class PriceCommands(commands.Cog):
         @self.price_group.command(name="check", description="Get current price of a cryptocurrency")
         @app_commands.describe(
             symbol="Cryptocurrency symbol (e.g., BTC, ETH)",
-            currency="Currency to convert to (default: USD)"
+            currency="Currency to convert to (default: USD)",
         )
         async def price_check(interaction: Interaction, symbol: str, currency: str = "USD"):
             """Get the current price of a cryptocurrency."""
@@ -48,12 +49,12 @@ class PriceCommands(commands.Cog):
                 if not price_data:
                     await interaction.followup.send(
                         f"Could not find price data for {symbol}. Please check the symbol and try again.",
-                        ephemeral=True
+                        ephemeral=True,
                     )
                     return
 
                 # Format the price with appropriate decimal places
-                price = price_data['price']
+                price = price_data["price"]
                 if price < 0.01:
                     formatted_price = f"{price:.8f}"
                 elif price < 1:
@@ -67,46 +68,44 @@ class PriceCommands(commands.Cog):
                 embed = Embed(
                     title=f"{price_data['name']} ({price_data['symbol']})",
                     description=f"Current price information",
-                    color=Color.blue() if price_data['percent_change_24h'] >= 0 else Color.red()
+                    color=Color.blue() if price_data["percent_change_24h"] >= 0 else Color.red(),
                 )
 
                 # Add price field
                 embed.add_field(
-                    name="Price",
-                    value=f"{formatted_price} {price_data['currency']}",
-                    inline=False
+                    name="Price", value=f"{formatted_price} {price_data['currency']}", inline=False
                 )
 
                 # Add price changes
                 embed.add_field(
                     name="1 Hour Change",
                     value=f"{price_data['percent_change_1h']:.2f}%",
-                    inline=True
+                    inline=True,
                 )
 
                 embed.add_field(
                     name="24 Hour Change",
                     value=f"{price_data['percent_change_24h']:.2f}%",
-                    inline=True
+                    inline=True,
                 )
 
                 embed.add_field(
                     name="7 Day Change",
                     value=f"{price_data['percent_change_7d']:.2f}%",
-                    inline=True
+                    inline=True,
                 )
 
                 # Add market data
                 embed.add_field(
                     name="Market Cap",
                     value=f"{price_data['market_cap']:,.0f} {price_data['currency']}",
-                    inline=True
+                    inline=True,
                 )
 
                 embed.add_field(
                     name="24h Volume",
                     value=f"{price_data['volume_24h']:,.0f} {price_data['currency']}",
-                    inline=True
+                    inline=True,
                 )
 
                 # Add last updated timestamp
@@ -117,14 +116,15 @@ class PriceCommands(commands.Cog):
             except Exception as e:
                 logger.error(f"Error checking price: {e}")
                 await interaction.followup.send(
-                    "Error fetching price data. Please try again later.",
-                    ephemeral=True
+                    "Error fetching price data. Please try again later.", ephemeral=True
                 )
 
-        @self.price_group.command(name="multi", description="Get prices for multiple cryptocurrencies")
+        @self.price_group.command(
+            name="multi", description="Get prices for multiple cryptocurrencies"
+        )
         @app_commands.describe(
             symbols="Comma-separated list of cryptocurrency symbols (e.g., BTC,ETH,XRP)",
-            currency="Currency to convert to (default: USD)"
+            currency="Currency to convert to (default: USD)",
         )
         async def multi_price(interaction: Interaction, symbols: str, currency: str = "USD"):
             """Get prices for multiple cryptocurrencies at once."""
@@ -135,8 +135,7 @@ class PriceCommands(commands.Cog):
 
             if not symbol_list:
                 await interaction.followup.send(
-                    "Please provide at least one cryptocurrency symbol.",
-                    ephemeral=True
+                    "Please provide at least one cryptocurrency symbol.", ephemeral=True
                 )
                 return
 
@@ -145,8 +144,7 @@ class PriceCommands(commands.Cog):
 
                 if not price_data:
                     await interaction.followup.send(
-                        "Could not find price data for any of the provided symbols.",
-                        ephemeral=True
+                        "Could not find price data for any of the provided symbols.", ephemeral=True
                     )
                     return
 
@@ -154,7 +152,7 @@ class PriceCommands(commands.Cog):
                 embed = Embed(
                     title="Cryptocurrency Prices",
                     description=f"Current prices in {currency}",
-                    color=Color.blue()
+                    color=Color.blue(),
                 )
 
                 # Add each cryptocurrency to the embed
@@ -163,7 +161,7 @@ class PriceCommands(commands.Cog):
                         continue
 
                     # Format the price with appropriate decimal places
-                    price = data['price']
+                    price = data["price"]
                     if price < 0.01:
                         formatted_price = f"{price:.8f}"
                     elif price < 1:
@@ -174,7 +172,7 @@ class PriceCommands(commands.Cog):
                         formatted_price = f"{price:,.2f}"
 
                     # Format 24h change with color indicator
-                    change_24h = data['percent_change_24h']
+                    change_24h = data["percent_change_24h"]
                     change_text = f"{change_24h:.2f}%"
                     if change_24h >= 0:
                         change_text = f"▲ {change_text}"
@@ -184,7 +182,7 @@ class PriceCommands(commands.Cog):
                     embed.add_field(
                         name=f"{data['name']} ({data['symbol']})",
                         value=f"**Price:** {formatted_price} {currency}\n**24h:** {change_text}",
-                        inline=True
+                        inline=True,
                     )
 
                 embed.set_footer(text=f"Last Updated: {data['last_updated']}")
@@ -194,8 +192,7 @@ class PriceCommands(commands.Cog):
             except Exception as e:
                 logger.error(f"Error checking multiple prices: {e}")
                 await interaction.followup.send(
-                    "Error fetching price data. Please try again later.",
-                    ephemeral=True
+                    "Error fetching price data. Please try again later.", ephemeral=True
                 )
 
         @self.price_group.command(name="help", description="Get help with price commands")
@@ -204,25 +201,25 @@ class PriceCommands(commands.Cog):
             embed = Embed(
                 title="Price Commands - Cryptocurrency Price Tracker",
                 description="Get real-time cryptocurrency prices directly in Discord.",
-                color=Color.gold()
+                color=Color.gold(),
             )
 
             embed.add_field(
                 name="📊 Check Price",
                 value="Use `/price check <symbol>` to get detailed information about a specific cryptocurrency.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="📈 Multiple Prices",
                 value="Use `/price multi <symbols>` to check multiple cryptocurrencies at once. Separate symbols with commas, e.g., `BTC,ETH,XRP`.",
-                inline=False
+                inline=False,
             )
 
             embed.add_field(
                 name="💱 Currency Conversion",
                 value="Add a currency parameter to any price command to convert to a different currency, e.g., `/price check BTC EUR`.",
-                inline=False
+                inline=False,
             )
 
             embed.set_footer(text="Powered by CoinMarketCap")

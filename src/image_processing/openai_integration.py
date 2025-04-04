@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ def encode_image(image_path):
 
 
 def load_chart_config(config_path):
-    with open(config_path, 'r') as file:
+    with open(config_path, "r") as file:
         return json.load(file)
 
 
@@ -29,8 +29,13 @@ def process_chart_with_gpt4o(image_path, config_path, user_config=None):
     config = load_chart_config(config_path)
 
     if user_config:
-        for key in ['entry_color', 'stop_loss_color', 'take_profit_color',
-                    'output_format', 'indicators']:
+        for key in [
+            "entry_color",
+            "stop_loss_color",
+            "take_profit_color",
+            "output_format",
+            "indicators",
+        ]:
             if key in user_config:
                 config[key] = user_config[key]
 
