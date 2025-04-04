@@ -44,6 +44,7 @@ jobs:
     
     - name: Install dependencies
       run: |
+        poetry lock
         poetry install --with dev
     
     - name: Lint with pylint
