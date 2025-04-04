@@ -4,19 +4,13 @@ import os
 
 from dotenv import load_dotenv
 from telegram import Update, Bot
-from telegram.ext import (
-    ApplicationBuilder,
-    CommandHandler,
-    ContextTypes,
-    MessageHandler,
-    filters
-)
+from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes, MessageHandler, filters
 
 from src.image_processing.openai_integration import process_chart_with_gpt4o
 
 logger = logging.getLogger(__name__)
 load_dotenv()
-telegram_token = os.getenv('TELEGRAM_TOKEN')
+telegram_token = os.getenv("TELEGRAM_TOKEN")
 
 
 class TelegramBotManager:
@@ -35,9 +29,9 @@ class TelegramBotManager:
         self.bot = Bot(token)
         self.application = ApplicationBuilder().token(token).build()
 
-        self.application.add_handler(CommandHandler('start', self._start))
-        self.application.add_handler(CommandHandler('help', self._help_command))
-        self.application.add_handler(CommandHandler('analyze', self._analyze_command))
+        self.application.add_handler(CommandHandler("start", self._start))
+        self.application.add_handler(CommandHandler("help", self._help_command))
+        self.application.add_handler(CommandHandler("analyze", self._analyze_command))
 
         self.application.add_handler(MessageHandler(filters.PHOTO, self._handle_photo))
 
@@ -75,7 +69,7 @@ class TelegramBotManager:
         logger.info("Shutting down Telegram bot...")
         try:
 
-            if hasattr(self.application, 'updater') and self.application.updater:
+            if hasattr(self.application, "updater") and self.application.updater:
                 logger.info("Stopping Telegram updater...")
                 await self.application.updater.stop()
 
@@ -100,13 +94,13 @@ class TelegramBotManager:
 
     async def _start(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a welcome message when the command /start is issued."""
-        await update.message.reply_text('Hello! I am your Chart Sayer bot.')
+        await update.message.reply_text("Hello! I am your Chart Sayer bot.")
 
     async def _help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Send a help message when the command /help is issued."""
         await update.message.reply_text(
-            'I can analyze chart images for you!\n\n'
-            'Simply send me an image of a chart, or use the /analyze command and attach an image.'
+            "I can analyze chart images for you!\n\n"
+            "Simply send me an image of a chart, or use the /analyze command and attach an image."
         )
 
     async def _analyze_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -115,9 +109,9 @@ class TelegramBotManager:
             await self._process_image(update, context)
         else:
             await update.message.reply_text(
-                'Please attach an image to analyze. You can:\n'
-                '1. Send me an image directly\n'
-                '2. Use the /analyze command with an attached image'
+                "Please attach an image to analyze. You can:\n"
+                "1. Send me an image directly\n"
+                "2. Use the /analyze command with an attached image"
             )
 
     async def _handle_photo(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -126,13 +120,13 @@ class TelegramBotManager:
 
     async def _process_image(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Process the chart image and return analysis."""
-        processing_message = await update.message.reply_text('Processing your chart image...')
+        processing_message = await update.message.reply_text("Processing your chart image...")
 
         try:
             photo = update.message.photo[-1]
             photo_file = await context.bot.get_file(photo.file_id)
 
-            os.makedirs('/tmp', exist_ok=True)
+            os.makedirs("/tmp", exist_ok=True)
 
             image_path = f"/tmp/telegram_image_{photo.file_id}.jpg"
 

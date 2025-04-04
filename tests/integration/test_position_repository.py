@@ -1,6 +1,7 @@
 """
 Integration tests for position repository.
 """
+
 from unittest.mock import patch, MagicMock
 from uuid import UUID
 
@@ -8,7 +9,13 @@ import fakeredis.aioredis
 import pytest
 import pytest_asyncio
 
-from src.positions.models import Position, PositionCreate, PositionStatus, PlatformType, PositionType
+from src.positions.models import (
+    Position,
+    PositionCreate,
+    PositionStatus,
+    PlatformType,
+    PositionType,
+)
 from src.positions.repository import PositionRepository
 from src.storage.redis_client import RedisClient
 
@@ -19,8 +26,8 @@ async def redis_client():
     # Use fakeredis for testing
     fake_redis = fakeredis.aioredis.FakeRedis()
 
-    with patch('redis.asyncio.Redis', return_value=fake_redis):
-        with patch('redis.asyncio.ConnectionPool.from_url', return_value=MagicMock()):
+    with patch("redis.asyncio.Redis", return_value=fake_redis):
+        with patch("redis.asyncio.ConnectionPool.from_url", return_value=MagicMock()):
             client = RedisClient("redis://fakehost:6379/0")
             # Override get_redis to return our fake redis
             client.get_redis = MagicMock(return_value=fake_redis)
@@ -86,7 +93,9 @@ class TestPositionRepository:
         assert position.symbol == sample_position_data.symbol
 
         # Test non-existent position
-        position = await position_repository.get_position(UUID("00000000-0000-0000-0000-000000000000"))
+        position = await position_repository.get_position(
+            UUID("00000000-0000-0000-0000-000000000000")
+        )
         assert position is None
 
     @pytest.mark.asyncio
@@ -97,13 +106,16 @@ class TestPositionRepository:
 
         # Update position
         from src.positions.models import PositionUpdate
+
         update_data = PositionUpdate(
             entry_price=51000.0,
             take_profit=56000.0,
             stop_loss=49000.0,
         )
 
-        updated_position = await position_repository.update_position(created_position.id, update_data)
+        updated_position = await position_repository.update_position(
+            created_position.id, update_data
+        )
 
         # Verify updates
         assert updated_position is not None
@@ -181,8 +193,7 @@ class TestPositionRepository:
 
         # Get positions for our test user
         positions = await position_repository.get_user_positions(
-            sample_position_data.user_id,
-            sample_position_data.platform
+            sample_position_data.user_id, sample_position_data.platform
         )
 
         # Verify we got the correct positions
@@ -196,8 +207,7 @@ class TestPositionRepository:
 
         # Get active positions
         active_positions = await position_repository.get_user_active_positions(
-            sample_position_data.user_id,
-            sample_position_data.platform
+            sample_position_data.user_id, sample_position_data.platform
         )
 
         # Verify we only get the active position

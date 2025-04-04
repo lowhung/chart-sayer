@@ -16,6 +16,7 @@ async def discord_interactions(request: Request):
     try:
         # Get configuration
         from src.main import config
+
         discord_config = config.get("discord", {})
         public_key = discord_config.get("public_key")
 
