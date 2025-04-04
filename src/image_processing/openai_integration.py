@@ -39,7 +39,15 @@ def process_chart_with_gpt4o(image_path, config_path, user_config=None):
             if key in user_config:
                 config[key] = user_config[key]
 
-    prompt = f"Look at this chart image. Find the following data points. Entry color: {config['entry_color']}, Stop Loss color: {config['stop_loss_color']}, Take Profit color: {config['take_profit_color']}. "
+    prompt = (
+        f"Look at this chart image. "
+        f"Find the following data points."
+        f"Symbol (BTC/ETH/USDT), "
+        f"Entry (color={config['entry_color']}), "
+        f"Stop Loss (color={config['stop_loss_color']}), "
+        f"Take Profit (color={config['take_profit_color']}),"
+        f"Position Type (long/short). It is long if the Take Profit > Entry, and short if Entry < Take Profit. "
+    )
     prompt += f"Indicators: {', '.join(config['indicators'])}. "
     prompt += f"Output format: {config['output_format']}"
 
