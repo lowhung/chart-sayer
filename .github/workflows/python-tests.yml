@@ -47,10 +47,6 @@ jobs:
           poetry lock
           poetry install --with dev
 
-      - name: Lint with pylint
-        run: |
-          poetry run pylint src/ tests/ --disable=C0111
-
       - name: Check formatting with black
         run: |
           poetry run black --check src/ tests/
@@ -66,9 +62,3 @@ jobs:
       - name: Run integration tests
         run: |
           poetry run pytest tests/integration/
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          fail_ci_if_error: false

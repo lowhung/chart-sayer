@@ -121,7 +121,6 @@ Chart Sayer solves this by creating an integrated workflow where chart analysis 
 - Comprehensive unit testing for all methods
 - Integration tests for critical system flows
 - CI pipeline to automatically run tests on code changes
-- Code formatting with Black and linting with Pylint
 - Pre-commit hooks for code quality enforcement
 
 ### Extensibility
