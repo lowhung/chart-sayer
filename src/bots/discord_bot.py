@@ -4,6 +4,7 @@ import logging
 import os
 
 import aiohttp
+import discord
 from discord import app_commands, Intents, Interaction, Attachment, Object, Embed, Color, ButtonStyle
 from discord import ui
 from discord.ext import commands
@@ -105,7 +106,8 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
         async def analyze(interaction: Interaction, file: Attachment):
             if not file.content_type or not file.content_type.startswith("image/"):
                 await interaction.response.send_message(
-                    "Please upload an image file. This doesn't appear to be an image."
+                    "Please upload an image file. This doesn't appear to be an image.",
+                    ephemeral=True
                 )
                 return
 
@@ -151,14 +153,25 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                         await interaction.edit_original_response(view=None)
 
                         if position_id:
-                            # Announce the position creation to the channel
-                            channel = interaction.channel
-                            if channel:
-                                # Post position creation announcement
-                                await channel.send(
-                                    f"{interaction.user.mention} has created a new position based on chart analysis."
-                                    f" Use `/position {position_id}` to see details."
+                            try:
+                                # Announce the position creation to the channel
+                                channel = interaction.channel
+                                if channel:
+                                    # Post position creation announcement
+                                    await channel.send(
+                                        f"{interaction.user.mention} has created a new position based on chart analysis."
+                                        f" Use `/position {position_id}` to see details."
+                                    )
+                            except discord.errors.Forbidden as e:
+                                logger.error(f"Permission error when announcing position: {e}")
+                                # Still notify the user of successful creation, just in the ephemeral message
+                                await interaction.followup.send(
+                                    f"Position created successfully, but I couldn't announce it in the channel due to missing permissions.",
+                                    ephemeral=True
                                 )
+
+                            except Exception as e:
+                                logger.error(f"Error announcing position: {e}")
 
                     # Create the position creation view
                     view = PositionCreationView(user_id, result, on_complete=on_position_created)
@@ -180,7 +193,8 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 # Send result with the button
                 await interaction.followup.send(
                     f"Analysis Result: {result}",
-                    view=view
+                    view=view,
+                    ephemeral=True
                 )
 
             except Exception as e:
@@ -323,14 +337,24 @@ class ChartSayerCog(commands.Cog, name="Chart Sayer"):
                 await interaction.edit_original_response(view=None)
 
                 if position_id:
-                    # Announce the position creation to the channel
-                    channel = ctx.channel
-                    if channel:
-                        # Post position creation announcement
-                        await channel.send(
-                            f"{ctx.author.mention} has created a new position based on chart analysis."
-                            f" Use `/position {position_id}` to see details."
+                    try:
+                        # Announce the position creation to the channel
+                        channel = interaction.channel
+                        if channel:
+                            # Post position creation announcement
+                            await channel.send(
+                                f"{interaction.user.mention} has created a new position based on chart analysis."
+                                f" Use `/position {position_id}` to see details."
+                            )
+                    except discord.errors.Forbidden as e:
+                        logger.error(f"Permission error when announcing position: {e}")
+                        # Still notify the user of successful creation, just in the ephemeral message
+                        await interaction.followup.send(
+                            f"Position created successfully, but I couldn't announce it in the channel due to missing permissions.",
+                            ephemeral=True
                         )
+                    except Exception as e:
+                        logger.error(f"Error announcing position: {e}")
 
             # Create the position creation view
             view = PositionCreationView(user_id, result, on_complete=on_position_created)
