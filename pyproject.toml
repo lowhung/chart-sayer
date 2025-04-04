@@ -27,7 +27,6 @@ pytest = ">=7.4.0,<8.0.0"
 pytest-cov = ">=4.1.0,<5.0.0"
 pytest-mock = ">=3.12.0,<4.0.0"
 pytest-asyncio = ">=0.21.1,<0.22.0"
-mypy = ">=1.4.1,<2.0.0"
 pre-commit = ">=3.3.3,<4.0.0"
 types-redis = ">=4.6.0,<5.0.0"
 
@@ -69,7 +68,6 @@ exclude = '''
 /(
   .git
   | \.hg
-  | \.mypy_cache
   | \.tox
   | \.venv
   | _build
@@ -78,17 +76,6 @@ exclude = '''
   | dist
 )/
 '''
-
-[tool.mypy]
-python_version = "3.12"
-warn_return_any = true
-warn_unused_configs = true
-disallow_untyped_defs = false
-disallow_incomplete_defs = false
-check_untyped_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-strict_optional = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
