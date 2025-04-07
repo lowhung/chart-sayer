@@ -11,7 +11,7 @@ services:
     env_file:
       - .env
     environment:
-      - REDIS_URL=redis://redis:6379/0
+      - REDIS_URL=redis://redis:6380/0
     depends_on:
       - redis
     volumes:
@@ -30,10 +30,10 @@ services:
     image: redis:7-alpine
     container_name: chart-sayer-redis
     ports:
-      - "6379:6379"
+      - "6380:6380"
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --port 6380 --appendonly yes
     networks:
       - chart-sayer-network
     restart: on-failure
@@ -48,7 +48,7 @@ services:
     image: rediscommander/redis-commander:latest
     container_name: chart-sayer-redis-commander
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOSTS=local:redis:6380
     ports:
       - "8081:8081"
     depends_on:

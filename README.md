@@ -59,7 +59,7 @@ Ensure you have the following environment variables set in your `.env` file:
 - `DISCORD_CLIENT_SECRET`: Your Discord client secret.
 - `DISCORD_PUBLIC_KEY`: Your Discord public key.
 - `OPENAI_API_KEY`: Your OpenAI API key.
-- `REDIS_URL`: URL for the Redis connection (default: `redis://localhost:6379/0`, or `redis://redis:6379/0` when using Docker).
+- `REDIS_URL`: URL for the Redis connection (default: `redis://localhost:6380/0`, or `redis://redis:6380/0` when using Docker).
 
 
 ## Usage
@@ -82,7 +82,7 @@ docker-compose down
 docker-compose up -d --build
 ```
 
-This will start the FastAPI server on port 8000 and a Redis instance on port 6379. You can access the API at http://localhost:8000.
+This will start the FastAPI server on port 8000 and a Redis instance on port 6380. You can access the API at http://localhost:8000.
 
 The setup also includes Redis Commander, a web-based Redis management tool, which you can access at http://localhost:8081.
 
