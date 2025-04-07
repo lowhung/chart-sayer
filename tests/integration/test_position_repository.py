@@ -28,7 +28,7 @@ async def redis_client():
 
     with patch("redis.asyncio.Redis", return_value=fake_redis):
         with patch("redis.asyncio.ConnectionPool.from_url", return_value=MagicMock()):
-            client = RedisClient("redis://fakehost:6379/0")
+            client = RedisClient("redis://fakehost:6380/0")
             # Override get_redis to return our fake redis
             client.get_redis = MagicMock(return_value=fake_redis)
             yield client

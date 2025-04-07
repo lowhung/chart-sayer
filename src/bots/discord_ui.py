@@ -14,7 +14,9 @@ class SetupMenuView(ui.View):
         placeholder="Select a setting to configure",
         options=[
             SelectOption(
-                label="Entry Color", description="Set color for entry points", value="entry_color"
+                label="Entry Color",
+                description="Set color for entry points",
+                value="entry_color",
             ),
             SelectOption(
                 label="Stop Loss Color",
